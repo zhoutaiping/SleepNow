@@ -1,0 +1,56 @@
+.page { padding: 32rpx; }
+.head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24rpx; }
+.title { font-size: 36rpx; font-weight: 600; }
+.add-btn { background: var(--primary); color: #fff; font-size: 26rpx; padding: 0 28rpx; margin: 0; }
+.list { display: flex; flex-direction: column; gap: 16rpx; }
+.log-item {
+  background: var(--card);
+  border: 1rpx solid var(--border);
+  border-radius: 20rpx;
+  padding: 24rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.log-time { font-size: 28rpx; }
+.log-rating { color: var(--text-sub); font-size: 26rpx; }
+.state { text-align: center; color: var(--text-sub); padding: 80rpx 0; }
+.state button { margin-top: 20rpx; background: var(--primary); color: #fff; }
+.modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-end;
+  z-index: 99;
+}
+.modal-card {
+  width: 100%;
+  background: var(--card);
+  border-radius: 32rpx 32rpx 0 0;
+  padding: 40rpx;
+  box-sizing: border-box;
+}
+.modal-title { font-size: 32rpx; font-weight: 600; display: block; margin-bottom: 24rpx; }
+.field { background: var(--bg); border-radius: 16rpx; padding: 28rpx; margin-bottom: 20rpx; font-size: 28rpx; }
+.rating-row { display: flex; gap: 16rpx; margin: 16rpx 0 24rpx; }
+.star { font-size: 48rpx; color: var(--text-sub); }
+.star.on { color: #ffb300; }
+.modal-actions { display: flex; gap: 20rpx; }
+.modal-actions button { flex: 1; }
+.modal-actions button:last-child { background: var(--primary); color: #fff; }
+.log-date { display: block; font-size: 28rpx; font-weight: 500; }
+.log-time { display: block; font-size: 24rpx; color: var(--text-sub); margin-top: 6rpx; }
+.log-meta { display: flex; flex-direction: column; align-items: flex-end; }
+.log-rating { font-size: 26rpx; color: #ffb300; }
+.log-duration { font-size: 22rpx; color: var(--text-sub); margin-top: 4rpx; }
+.note-field {
+  width: 100%;
+  background: var(--bg);
+  border-radius: 16rpx;
+  padding: 20rpx;
+  margin: 8rpx 0 24rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+  min-height: 120rpx;
+}

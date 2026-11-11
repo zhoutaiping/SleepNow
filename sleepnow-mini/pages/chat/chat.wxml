@@ -1,0 +1,65 @@
+<view class="chat-page">
+  <view class="chat-header">
+    <text class="chat-title">{{t.chatTitle}}</text>
+    <view class="header-actions">
+      <text class="header-btn" bindtap="onClear">{{t.newChat}}</text>
+      <text class="header-btn model" bindtap="onPickModel">{{modelName}}</text>
+    </view>
+  </view>
+
+  <view wx:if="{{identityMode==='guest'}}" class="guest-bar" bindtap="onGoLogin">
+    <text class="guest-text">{{t.loginHint}}</text>
+    <text class="guest-go">{{t.goLogin}} ›</text>
+  </view>
+
+  <scroll-view class="msg-scroll" scroll-y scroll-into-view="{{scrollToId}}" scroll-with-animation>
+    <view wx:if="{{empty && !isGenerating}}" class="empty-state">
+      <text class="empty-title">{{t.emptyTitle}}</text>
+      <text class="empty-hint">{{t.emptyHint}}</text>
+    </view>
+    <block wx:for="{{messages}}" wx:key="index">
+      <view id="msg-{{index}}" class="msg-row {{item.role}}">
+        <view class="bubble {{item.role}}">
+          <text class="bubble-text" wx:if="{{item.content}}">{{item.content}}</text>
+          <view wx:elif="{{item.role==='assistant' && isGenerating}}" class="typing">
+            <text class="dot"></text><text class="dot"></text><text class="dot"></text>
+          </view>
+        </view>
+      </view>
+    </block>
+  </scroll-view>
+
+  <view wx:if="{{error}}" class="error-bar" bindtap="onRetry">
+    <text class="error-text">{{errorText}}</text>
+    <text class="error-retry">{{t.retry}}</text>
+  </view>
+
+  <view class="input-bar">
+    <textarea
+      class="input"
+      value="{{inputText}}"
+      bindinput="onInput"
+      placeholder="{{t.placeholder}}"
+      placeholder-class="input-ph"
+      auto-height
+      maxlength="2000"
+      disabled="{{isGenerating}}"
+    />
+    <view wx:if="{{isGenerating}}" class="send-btn stop" bindtap="onStop">{{t.stop}}</view>
+    <view wx:else class="send-btn" bindtap="onSend">{{t.send}}</view>
+  </view>
+
+  <view wx:if="{{showModelSheet}}" class="sheet-mask" bindtap="onCloseSheet">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet-title">{{t.chooseModel}}</view>
+      <view
+        wx:for="{{models}}"
+        wx:key="id"
+        class="sheet-item {{model===item.id ? 'active' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="onSelectModel"
+      >{{item.name || item.id}}</view>
+      <view class="sheet-cancel" bindtap="onCloseSheet">{{t.cancel}}</view>
+    </view>
+  </view>
+</view>

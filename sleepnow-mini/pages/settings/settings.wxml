@@ -1,0 +1,34 @@
+<view class="page">
+  <view class="card profile">
+    <text class="avatar">{{user ? (user.name ? user.name[0] : (user.phone ? user.phone[0] : '?')) : '游'}}</text>
+    <view class="profile-info">
+      <text class="profile-name">{{user ? (user.name || user.phone || '微信用户') : (isGuest ? '访客' : loginText)}}</text>
+      <text class="text-sub" wx:if="{{user}}">已登录</text>
+      <text class="text-sub" wx:elif="{{isGuest}}">未登录 · 数据仅存本机</text>
+    </view>
+    <button wx:if="{{!user && !loading}}" class="login" bindtap="onLogin">{{loginText}}</button>
+    <button wx:if="{{user}}" class="logout" bindtap="onLogout">{{logoutText}}</button>
+  </view>
+
+  <view class="card">
+    <text class="card-title">{{langText}}</text>
+    <view class="seg">
+      <view class="seg-item {{lang === 'zh-CN' ? 'on' : ''}}" bindtap="switchLang" data-lang="zh-CN"><text>中文</text></view>
+      <view class="seg-item {{lang === 'en-US' ? 'on' : ''}}" bindtap="switchLang" data-lang="en-US"><text>English</text></view>
+    </view>
+  </view>
+
+  <view class="card">
+    <text class="card-title">{{themeText}}</text>
+    <view class="seg">
+      <view class="seg-item {{theme === 'auto' ? 'on' : ''}}" bindtap="switchTheme" data-theme="auto"><text>跟随系统</text></view>
+      <view class="seg-item {{theme === 'light' ? 'on' : ''}}" bindtap="switchTheme" data-theme="light"><text>浅色</text></view>
+      <view class="seg-item {{theme === 'dark' ? 'on' : ''}}" bindtap="switchTheme" data-theme="dark"><text>深色</text></view>
+    </view>
+  </view>
+
+  <view class="card">
+    <text class="card-title">{{aboutText}}</text>
+    <text class="text-sub">晚安开关 v1.0.0 · WorkBuddy 云服务</text>
+  </view>
+</view>

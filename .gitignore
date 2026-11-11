@@ -1,0 +1,16 @@
+# WorkBuddy 项目本地数据（含 memory、任务状态，不入库）
+.workbuddy/
+
+# WorkBuddy 云服务应用卡片（激活产物，本地状态）
+*.genie
+
+# 小程序依赖与构建产物
+node_modules/
+miniprogram_npm/
+*.log
+
+# macOS / 编辑器
+.DS_Store
+.idea/
+.vscode/
+*.swp

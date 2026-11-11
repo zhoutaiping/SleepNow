@@ -1,0 +1,8 @@
+{
+  "name": "sleepnow-mini",
+  "version": "1.0.0",
+  "description": "晚安开关 微信小程序（WorkBuddy 云服务）",
+  "dependencies": {
+    "@tencent-ai/workbuddy-cloud-sdk": "dev"
+  }
+}

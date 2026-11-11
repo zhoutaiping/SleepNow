@@ -1,0 +1,51 @@
+<view class="page">
+  <view class="head">
+    <text class="title">{{title}}</text>
+    <button class="add-btn" bindtap="openForm">+ {{addText}}</button>
+  </view>
+
+  <view wx:if="{{status === 'loading'}}" class="state">加载中…</view>
+  <view wx:elif="{{status === 'error'}}" class="state">
+    <text>{{errorMsg}}</text>
+    <button bindtap="retry">重试</button>
+  </view>
+  <view wx:elif="{{status === 'empty'}}" class="state">
+    <text>{{logEmpty}}</text>
+    <button bindtap="openForm">记录第一条</button>
+  </view>
+  <view wx:else class="list">
+    <view class="log-item" wx:for="{{logs}}" wx:key="id">
+      <view>
+        <text class="log-date">{{item.date}}</text>
+        <text class="log-time">{{item.time}}</text>
+      </view>
+      <view class="log-meta">
+        <text class="log-rating">★ {{item.quality}}</text>
+        <text class="log-duration" wx:if="{{item.duration}}">· {{item.duration}} 分钟</text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{formVisible}}" class="modal">
+    <view class="modal-card">
+      <text class="modal-title">{{addText}}</text>
+      <picker mode="date" value="{{sleepDate}}" bindchange="onDate">
+        <view class="field">{{dateLabel}}：{{sleepDate}}</view>
+      </picker>
+      <picker mode="time" value="{{bedTime}}" bindchange="onBedTime">
+        <view class="field">{{bedtimeLabel}}：{{bedTime || '选择'}}</view>
+      </picker>
+      <picker mode="time" value="{{wakeTime}}" bindchange="onWakeTime">
+        <view class="field">{{wakeLabel}}：{{wakeTime || '选择'}}</view>
+      </picker>
+      <view class="rating-row">
+        <text wx:for="{{[1,2,3,4,5]}}" wx:key="*this" class="star {{quality >= item ? 'on' : ''}}" bindtap="onQuality" data-value="{{item}}">★</text>
+      </view>
+      <textarea class="note-field" placeholder="{{noteLabel}}" value="{{note}}" bindinput="onNote" />
+      <view class="modal-actions">
+        <button bindtap="closeForm">{{cancelText}}</button>
+        <button type="primary" bindtap="save">{{saveText}}</button>
+      </view>
+    </view>
+  </view>
+</view>

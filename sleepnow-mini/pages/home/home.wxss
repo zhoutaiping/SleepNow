@@ -1,0 +1,24 @@
+.page { padding: 32rpx; }
+.hero { padding: 16rpx 0 36rpx; }
+.hero-title { display: block; font-size: 42rpx; font-weight: 600; }
+.hero-sub { display: block; margin-top: 10rpx; color: var(--text-sub); font-size: 26rpx; }
+.card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16rpx; }
+.sound-row { display: flex; flex-wrap: wrap; gap: 16rpx; margin-top: 16rpx; }
+.sound-chip {
+  background: var(--primary-soft);
+  color: var(--primary);
+  padding: 16rpx 30rpx;
+  border-radius: 40rpx;
+  font-size: 26rpx;
+}
+.streak-box { display: flex; align-items: center; gap: 20rpx; margin-top: 14rpx; }
+.checkin-btn {
+  background: var(--primary);
+  color: #fff;
+  font-size: 24rpx;
+  padding: 0 28rpx;
+  margin: 0;
+  line-height: 56rpx;
+  height: 56rpx;
+}
+.checkin-btn.done { background: var(--primary-soft); color: var(--primary); }

@@ -1,0 +1,22 @@
+<view class="page player">
+  <view class="disc {{playing ? 'spin' : ''}}">
+    <text class="disc-title">{{title}}</text>
+  </view>
+
+  <view class="controls">
+    <button bindtap="toggle">{{playing ? '暂停' : '播放'}}</button>
+    <button bindtap="stop">{{stopText}}</button>
+  </view>
+
+  <view class="timer-box">
+    <text class="card-title">{{timerTitle}}</text>
+    <view class="timer-row">
+      <view class="timer-chip {{activeMin === item ? 'on' : ''}}" wx:for="{{timers}}" wx:key="*this" bindtap="setTimer" data-min="{{item}}">
+        <text>{{item}} 分</text>
+      </view>
+      <view class="timer-chip {{activeMin === 0 ? 'on' : ''}}" bindtap="setTimer" data-min="0">
+        <text>关闭</text>
+      </view>
+    </view>
+  </view>
+</view>

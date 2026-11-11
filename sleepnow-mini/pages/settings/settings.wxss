@@ -1,0 +1,29 @@
+.page { padding: 32rpx; }
+.profile { display: flex; align-items: center; }
+.avatar {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  margin-right: 24rpx;
+}
+.profile-info { flex: 1; }
+.profile-name { font-size: 32rpx; font-weight: 600; display: block; margin-bottom: 6rpx; }
+.login { background: var(--primary); color: #fff; font-size: 26rpx; padding: 0 28rpx; margin: 0; }
+.logout { background: transparent; color: var(--text-sub); font-size: 26rpx; padding: 0 28rpx; margin: 0; }
+.seg { display: flex; gap: 16rpx; margin-top: 16rpx; }
+.seg-item {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx 0;
+  background: var(--card);
+  border: 1rpx solid var(--border);
+  border-radius: 16rpx;
+  font-size: 26rpx;
+}
+.seg-item.on { background: var(--primary); color: #fff; border-color: var(--primary); }

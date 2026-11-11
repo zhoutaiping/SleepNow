@@ -1,0 +1,27 @@
+<view class="page">
+  <view class="hero">
+    <text class="hero-title">{{greeting}}</text>
+    <view class="streak-box">
+      <text class="hero-sub">{{streakText}} {{streak}} 天</text>
+      <button class="checkin-btn {{checkedToday ? 'done' : ''}}" bindtap="checkin" disabled="{{checkedToday}}">
+        {{checkedToday ? checkedText : checkinText}}
+      </button>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="card-head">
+      <text class="card-title">{{todayLogTitle}}</text>
+    </view>
+    <button class="cta" bindtap="goLog">{{logAddBtn}}</button>
+  </view>
+
+  <view class="card">
+    <text class="card-title">{{recommendTitle}}</text>
+    <view class="sound-row">
+      <view class="sound-chip" wx:for="{{recommend}}" wx:key="id" bindtap="playSound" data-src="{{item.src}}" data-title="{{item.name}}">
+        <text>{{item.name}}</text>
+      </view>
+    </view>
+  </view>
+</view>

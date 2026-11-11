@@ -1,0 +1,66 @@
+page {
+  --bg: #f5f7fa;
+  --card: #ffffff;
+  --text: #1f2329;
+  --text-sub: #8a8aa0;
+  --primary: #7c6cf0;
+  --primary-soft: rgba(124, 108, 240, 0.12);
+  --border: rgba(0, 0, 0, 0.06);
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+}
+
+/* 系统深色模式自动适配 */
+@media (prefers-color-scheme: dark) {
+  page {
+    --bg: #16162a;
+    --card: #1f1f38;
+    --text: #f2f2f8;
+    --text-sub: #8a8aa0;
+    --primary: #9d8cff;
+    --primary-soft: rgba(157, 140, 255, 0.16);
+    --border: rgba(255, 255, 255, 0.08);
+  }
+}
+
+button {
+  border-radius: 16rpx;
+}
+
+.page {
+  padding: 32rpx;
+  box-sizing: border-box;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 24rpx;
+  padding: 28rpx;
+  margin-bottom: 24rpx;
+  border: 1rpx solid var(--border);
+}
+
+.card-title {
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.text-sub {
+  color: var(--text-sub);
+  font-size: 26rpx;
+}
+
+.cta {
+  background: var(--primary);
+  color: #fff;
+  margin-top: 16rpx;
+}
+
+.state {
+  text-align: center;
+  color: var(--text-sub);
+  padding: 80rpx 0;
+  font-size: 28rpx;
+}

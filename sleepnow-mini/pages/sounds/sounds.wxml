@@ -1,0 +1,9 @@
+<view class="page">
+  <text class="card-title">{{title}}</text>
+  <view class="grid">
+    <view class="sound-card" wx:for="{{sounds}}" wx:key="id" bindtap="play" data-src="{{item.src}}" data-name="{{item.name}}">
+      <text class="sound-name">{{item.name}}</text>
+      <text class="text-sub">{{item.desc}}</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,11 @@
+.page { padding: 32rpx; }
+.grid { display: flex; flex-wrap: wrap; gap: 20rpx; margin-top: 20rpx; }
+.sound-card {
+  width: calc((100% - 20rpx) / 2);
+  background: var(--card);
+  border: 1rpx solid var(--border);
+  border-radius: 24rpx;
+  padding: 28rpx;
+  box-sizing: border-box;
+}
+.sound-name { display: block; font-size: 30rpx; font-weight: 600; margin-bottom: 6rpx; }

@@ -1,0 +1,36 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/sounds/sounds",
+    "pages/player/player",
+    "pages/sleep-log/sleep-log",
+    "pages/settings/settings",
+    "pages/login/login",
+    "pages/chat/chat"
+  ],
+  "window": {
+    "navigationBarTitleText": "晚安开关",
+    "navigationBarBackgroundColor": "#16162a",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#16162a",
+    "backgroundTextStyle": "dark",
+    "darkmode": true
+  },
+  "tabBar": {
+    "color": "#8a8aa0",
+    "selectedColor": "#9d8cff",
+    "backgroundColor": "#16162a",
+    "borderStyle": "black",
+    "list": [
+      { "pagePath": "pages/home/home", "text": "首页" },
+      { "pagePath": "pages/sounds/sounds", "text": "音频" },
+      { "pagePath": "pages/sleep-log/sleep-log", "text": "记录" },
+      { "pagePath": "pages/chat/chat", "text": "陪伴" },
+      { "pagePath": "pages/settings/settings", "text": "我的" }
+    ]
+  },
+  "requiredBackgroundModes": ["audio"],
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}
