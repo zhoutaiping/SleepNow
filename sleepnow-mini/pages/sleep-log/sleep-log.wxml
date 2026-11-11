@@ -1,7 +1,10 @@
 <view class="page">
   <view class="head">
     <text class="title">{{title}}</text>
-    <button class="add-btn" bindtap="openForm">+ {{addText}}</button>
+    <view class="head-actions">
+      <button class="stats-btn" bindtap="goStats">{{statsText}}</button>
+      <button class="add-btn" bindtap="openForm">+ {{addText}}</button>
+    </view>
   </view>
 
   <view wx:if="{{status === 'loading'}}" class="state">加载中…</view>

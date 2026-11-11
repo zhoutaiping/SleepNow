@@ -1,0 +1,72 @@
+.page { padding: 32rpx 32rpx 60rpx; }
+
+.head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28rpx; }
+.title { font-size: 36rpx; font-weight: 600; }
+.range-switch {
+  display: flex;
+  background: var(--card);
+  border: 1rpx solid var(--border);
+  border-radius: 999rpx;
+  padding: 6rpx;
+}
+.range-item {
+  padding: 10rpx 22rpx;
+  font-size: 24rpx;
+  color: var(--text-sub);
+  border-radius: 999rpx;
+}
+.range-item.active { background: var(--primary); color: #fff; }
+
+.metrics { display: flex; flex-wrap: wrap; gap: 16rpx; margin-bottom: 24rpx; }
+.metric {
+  width: calc((100% - 16rpx) / 2);
+  box-sizing: border-box;
+  background: var(--card);
+  border: 1rpx solid var(--border);
+  border-radius: 20rpx;
+  padding: 24rpx;
+}
+.metric-value { display: block; font-size: 40rpx; font-weight: 600; color: var(--primary); }
+.metric-label { display: block; font-size: 24rpx; color: var(--text-sub); margin-top: 8rpx; }
+.unit { font-size: 24rpx; margin-left: 4rpx; }
+
+.chart-card { padding: 28rpx; }
+.chart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 280rpx;
+  margin-top: 28rpx;
+  gap: 6rpx;
+}
+.bar-col {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+.bar-track {
+  height: 220rpx;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.bar {
+  width: 70%;
+  max-width: 28rpx;
+  border-radius: 8rpx 8rpx 0 0;
+  background: var(--primary);
+  transition: height .3s;
+}
+.bar-empty { background: var(--border); }
+.bar-value { font-size: 18rpx; color: var(--text-sub); margin-bottom: 4rpx; }
+.bar-label { font-size: 18rpx; color: var(--text-sub); margin-top: 10rpx; white-space: nowrap; }
+.chart-foot { display: block; text-align: right; font-size: 20rpx; color: var(--text-sub); margin-top: 16rpx; }
+
+.state { text-align: center; color: var(--text-sub); padding: 60rpx 0; font-size: 28rpx; }
+.state button { margin-top: 20rpx; background: var(--primary); color: #fff; font-size: 26rpx; }
+.retry { color: var(--primary); }
+.guest-hint { font-size: 24rpx; color: var(--text-sub); text-align: center; padding: 24rpx; }

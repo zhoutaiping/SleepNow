@@ -1,0 +1,58 @@
+<view class="page">
+  <view class="head">
+    <text class="title">{{t.title}}</text>
+    <view class="range-switch">
+      <view class="range-item {{range === 7 ? 'active' : ''}}" data-range="7" bindtap="switchRange">{{t.days7}}</view>
+      <view class="range-item {{range === 30 ? 'active' : ''}}" data-range="30" bindtap="switchRange">{{t.days30}}</view>
+    </view>
+  </view>
+
+  <view wx:if="{{status === 'loading'}}" class="state">{{t.loading}}</view>
+
+  <view wx:elif="{{status === 'error'}}" class="state" bindtap="retry">
+    <text>{{errorMsg}}</text>
+    <text class="retry"> · {{t.retry}}</text>
+  </view>
+
+  <block wx:else>
+    <view class="metrics">
+      <view class="metric">
+        <text class="metric-value">{{avgDuration}}</text>
+        <text class="metric-label">{{t.avgDuration}}</text>
+      </view>
+      <view class="metric">
+        <text class="metric-value">{{avgQuality}}</text>
+        <text class="metric-label">{{t.avgQuality}}</text>
+      </view>
+      <view class="metric">
+        <text class="metric-value">{{recordDays}}<text class="unit">{{t.daysUnit}}</text></text>
+        <text class="metric-label">{{t.recordDays}} · {{coverage}}%</text>
+      </view>
+      <view class="metric">
+        <text class="metric-value">{{streak}}<text class="unit">{{t.daysUnit}}</text></text>
+        <text class="metric-label">{{t.streak}}</text>
+      </view>
+    </view>
+
+    <view wx:if="{{status === 'empty'}}" class="card state">
+      <text>{{t.empty}}</text>
+      <button bindtap="goLog">{{t.goLog}}</button>
+    </view>
+
+    <view wx:else class="card chart-card">
+      <text class="card-title">{{t.chartTitle}}</text>
+      <view class="chart">
+        <view class="bar-col" wx:for="{{bars}}" wx:key="date">
+          <text class="bar-value" wx:if="{{item.hasData && range === 7}}">{{item.minutes}}</text>
+          <view class="bar-track">
+            <view class="bar {{item.hasData ? '' : 'bar-empty'}}" style="height:{{item.barHeight}}rpx"></view>
+          </view>
+          <text class="bar-label">{{item.label}}</text>
+        </view>
+      </view>
+      <text class="chart-foot">0 — {{maxLabel}}</text>
+    </view>
+
+    <view wx:if="{{isGuest}}" class="guest-hint">{{t.guestHint}}</view>
+  </block>
+</view>

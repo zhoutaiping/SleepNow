@@ -2,6 +2,8 @@
 .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24rpx; }
 .title { font-size: 36rpx; font-weight: 600; }
 .add-btn { background: var(--primary); color: #fff; font-size: 26rpx; padding: 0 28rpx; margin: 0; }
+.head-actions { display: flex; align-items: center; gap: 12rpx; }
+.stats-btn { background: var(--primary-soft); color: var(--primary); font-size: 26rpx; padding: 0 24rpx; margin: 0; }
 .list { display: flex; flex-direction: column; gap: 16rpx; }
 .log-item {
   background: var(--card);

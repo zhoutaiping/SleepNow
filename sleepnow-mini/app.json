@@ -6,7 +6,8 @@
     "pages/sleep-log/sleep-log",
     "pages/settings/settings",
     "pages/login/login",
-    "pages/chat/chat"
+    "pages/chat/chat",
+    "pages/stats/stats"
   ],
   "window": {
     "navigationBarTitleText": "晚安开关",

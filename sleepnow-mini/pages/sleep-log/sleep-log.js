@@ -19,7 +19,7 @@ function calcDuration(bed, wake) {
 Page({
   data: {
     title: '', addText: '', logEmpty: '', dateLabel: '', bedtimeLabel: '',
-    wakeLabel: '', ratingLabel: '', noteLabel: '',
+    wakeLabel: '', ratingLabel: '', noteLabel: '', statsText: '',
     saveText: '', cancelText: '',
     status: 'loading', logs: [], errorMsg: '', isGuest: false,
     formVisible: false,
@@ -35,6 +35,7 @@ Page({
       wakeLabel: i18n.t('log.wake'),
       ratingLabel: i18n.t('log.rating'),
       noteLabel: i18n.t('log.note'),
+      statsText: i18n.t('log.stats'),
       saveText: i18n.t('log.save'),
       cancelText: i18n.t('log.cancel'),
       sleepDate: todayStr(),
@@ -75,6 +76,7 @@ Page({
     this.setData({ status: logs.length ? 'ready' : 'empty', logs, isGuest: id.mode === 'guest' });
   },
   retry() { this.loadLogs(); },
+  goStats() { wx.navigateTo({ url: '/pages/stats/stats' }); },
   openForm() { this.setData({ formVisible: true }); },
   closeForm() { this.setData({ formVisible: false }); },
   onDate(e) { this.setData({ sleepDate: e.detail.value }); },
