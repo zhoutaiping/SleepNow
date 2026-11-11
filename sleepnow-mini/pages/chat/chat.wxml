@@ -1,32 +1,95 @@
 <view class="chat-page {{themeClass}}">
+  <!-- 顶部：标题 + AI 显式标识 + 清空 -->
   <view class="chat-header">
-    <text class="chat-title">{{t.chatTitle}}</text>
-    <view class="header-actions">
-      <text class="header-btn" bindtap="onClear">{{t.newChat}}</text>
-      <text class="header-btn model" bindtap="onPickModel">{{modelName}}</text>
+    <view class="header-left">
+      <text class="chat-title">{{t.subtitle}}</text>
+      <text class="ai-badge">{{t.aiBadge}}</text>
     </view>
+    <text class="pill pill-ghost header-clear" bindtap="onClear">{{t.clear}}</text>
   </view>
 
+  <!-- 模型行：带标签、当前值与箭头，不再是含义不明的灰色横条 -->
+  <view class="model-row" bindtap="onPickModel">
+    <text class="model-label">{{t.modelLabel}}</text>
+    <view class="model-right">
+      <text class="model-value">{{modelName}}</text>
+      <view class="row-arrow"></view>
+    </view>
+  </view>
+  <text class="model-hint">{{t.modelHint}}</text>
+
+  <!-- 访客提示 -->
   <view wx:if="{{identityMode==='guest'}}" class="guest-bar" bindtap="onGoLogin">
     <text class="guest-text">{{t.loginHint}}</text>
     <text class="guest-go">{{t.goLogin}} ›</text>
   </view>
 
+  <!-- 消息 / 空态 -->
   <scroll-view class="msg-scroll" scroll-y scroll-into-view="{{scrollToId}}" scroll-with-animation>
-    <view wx:if="{{empty && !isGenerating}}" class="empty-state">
-      <text class="empty-title">{{t.emptyTitle}}</text>
-      <text class="empty-hint">{{t.emptyHint}}</text>
-    </view>
+    <block wx:if="{{empty && !isGenerating}}">
+      <view class="welcome">
+        <text class="eyebrow">{{t.aiGenerated}}</text>
+        <text class="big-title">{{t.sceneTitle}}</text>
+        <text class="text-sub welcome-hint">{{t.sceneHint}}</text>
+      </view>
+
+      <view class="scene-grid">
+        <view
+          wx:for="{{scenes}}"
+          wx:key="id"
+          class="scene-card {{item.active ? 'active' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="onPickScene"
+        >
+          <view class="scene-top">
+            <text class="scene-no">{{item.no}}</text>
+            <text class="scene-go">→</text>
+          </view>
+          <text class="scene-name">{{item.title}}</text>
+          <text class="scene-desc">{{item.desc}}</text>
+        </view>
+      </view>
+
+      <view class="section"><text class="section-title">{{t.quickTitle}}</text></view>
+      <view class="quick-list">
+        <view
+          wx:for="{{quick}}"
+          wx:key="id"
+          class="quick-chip"
+          data-text="{{item.text}}"
+          bindtap="onQuick"
+        >{{item.text}}</view>
+      </view>
+      <text class="disclaimer-block">{{t.disclaimer}}</text>
+    </block>
+
     <block wx:for="{{messages}}" wx:key="index">
       <view id="msg-{{index}}" class="msg-row {{item.role}}">
-        <view class="bubble {{item.role}}">
+        <view class="msg-meta">
+          <text>{{item.role === 'user' ? t.you : t.assistant}}</text>
+          <text wx:if="{{item.role === 'assistant'}}" class="msg-ai">{{t.aiBadge}}</text>
+          <text class="msg-time">{{item.time}}</text>
+        </view>
+        <view class="bubble {{item.role}} {{item.blocked ? 'blocked' : ''}}">
           <text class="bubble-text" wx:if="{{item.content}}">{{item.content}}</text>
-          <view wx:elif="{{item.role==='assistant' && isGenerating}}" class="typing">
+          <view wx:elif="{{item.role === 'assistant' && isGenerating}}" class="typing">
             <text class="dot"></text><text class="dot"></text><text class="dot"></text>
+            <text class="typing-text">{{t.thinking}}</text>
           </view>
         </view>
       </view>
     </block>
+  </scroll-view>
+
+  <!-- 有会话后：场景切换条，随时换陪伴方式 -->
+  <scroll-view wx:if="{{!empty}}" class="scene-tabs" scroll-x>
+    <view
+      wx:for="{{scenes}}"
+      wx:key="id"
+      class="scene-tab {{item.active ? 'active' : ''}}"
+      data-id="{{item.id}}"
+      bindtap="onPickScene"
+    >{{item.title}}</view>
   </scroll-view>
 
   <view wx:if="{{error}}" class="error-bar" bindtap="onRetry">
@@ -34,31 +97,41 @@
     <text class="error-retry">{{t.retry}}</text>
   </view>
 
-  <view class="input-bar">
-    <textarea
-      class="input"
-      value="{{inputText}}"
-      bindinput="onInput"
-      placeholder="{{t.placeholder}}"
-      placeholder-class="input-ph"
-      auto-height
-      maxlength="2000"
-      disabled="{{isGenerating}}"
-    />
-    <view wx:if="{{isGenerating}}" class="send-btn stop" bindtap="onStop">{{t.stop}}</view>
-    <view wx:else class="send-btn" bindtap="onSend">{{t.send}}</view>
+  <!-- 输入区：额度 + 字数 + 明确文字的发送按钮 + 免责声明 -->
+  <view class="composer">
+    <view class="composer-top">
+      <text class="composer-quota">{{t.quota}} {{quota.used}}/{{quota.limit}} {{t.quotaUnit}} · {{t.quotaLeft}} {{quota.left}}</text>
+      <text class="composer-count">{{inputLen}}/500</text>
+    </view>
+    <view class="composer-row">
+      <textarea
+        class="input"
+        value="{{inputText}}"
+        bindinput="onInput"
+        placeholder="{{t.composerHint}}"
+        placeholder-class="input-ph"
+        auto-height
+        maxlength="500"
+        disabled="{{isGenerating}}"
+      />
+      <view wx:if="{{isGenerating}}" class="send-btn stop" bindtap="onStop">{{t.stop}}</view>
+      <view wx:else class="send-btn" bindtap="onSend">{{t.send}}</view>
+    </view>
+    <text class="composer-disclaimer">{{t.disclaimerShort}}</text>
   </view>
 
+  <!-- 模型选择弹层 -->
   <view wx:if="{{showModelSheet}}" class="sheet-mask" bindtap="onCloseSheet">
     <view class="sheet" catchtap="noop">
       <view class="sheet-title">{{t.chooseModel}}</view>
       <view
         wx:for="{{models}}"
         wx:key="id"
-        class="sheet-item {{model===item.id ? 'active' : ''}}"
+        class="sheet-item {{model === item.id ? 'active' : ''}}"
         data-id="{{item.id}}"
         bindtap="onSelectModel"
-      >{{item.name || item.id}}</view>
+      >{{item.name}}</view>
+      <view wx:if="{{safetyMode === 'local'}}" class="sheet-safety">{{t.safetyDev}}</view>
       <view class="sheet-cancel" bindtap="onCloseSheet">{{t.cancel}}</view>
     </view>
   </view>

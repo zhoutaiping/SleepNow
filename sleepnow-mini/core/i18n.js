@@ -36,7 +36,10 @@ function t(key) {
   return dict[key] !== undefined ? dict[key] : key;
 }
 
-// 返回当前语言全部词条，供页面 setData 后直接在 wxml 用 {{t.xxx}}
+// 返回当前语言全部词条（key 带点，如 'chat.title'）。
+// ⚠️ 不要把它直接 setData 成 t 后在 wxml 写 {{t.chatTitle}}：
+//    带点 key 无法用点号访问，会让整页文案变 undefined（陪伴页 v1 的真实 bug）。
+//    页面统一用 TEXT_KEYS + i18n.t() 生成驼峰别名对象，见 design-system/MASTER.md §8.2。
 function all() {
   return LANGS[currentLang] || zh;
 }
