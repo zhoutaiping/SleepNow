@@ -5,11 +5,10 @@
     <text class="notice-action">{{t.retry}} ›</text>
   </view>
 
-  <!-- 顶部：日期 + 问候 + 连续签到，纯文字层级，不再放大按钮 -->
+  <!-- 顶部：日期 + 问候，纯文字层级（连续签到信息下移到指标网格，避免与本周打卡重复） -->
   <view class="topbar">
     <text class="eyebrow">{{todayLabel}}</text>
     <text class="big-title hero-title">{{t.greeting}}</text>
-    <text class="hero-sub-line">{{t.streak}} {{streak}} {{t.unitDay}}</text>
   </view>
 
   <!-- Hero：反相睡眠环形，整页唯一强焦点 -->
@@ -58,12 +57,11 @@
     </view>
   </view>
 
-  <!-- 近 7 天打卡条 -->
+  <!-- 近 7 天打卡条：未签到是可点按钮，已签到是非按钮状态标签（避免“禁用按钮当提示”的反模式） -->
   <view class="section">
     <text class="section-title">{{t.weekCheckin}}</text>
-    <button class="pill {{checkedToday ? 'pill-done' : 'pill-solid'}}" bindtap="checkin" disabled="{{checkedToday}}">
-      {{checkedToday ? t.checked : t.checkin}}
-    </button>
+    <view wx:if="{{checkedToday}}" class="pill pill-done">✓ {{t.checked}}</view>
+    <button wx:else class="pill pill-solid" bindtap="checkin">{{t.checkin}}</button>
   </view>
   <view class="panel">
     <view class="week-strip">

@@ -10,7 +10,7 @@ const theme = require('../../core/theme');
 const D = require('../../utils/dashboard');
 
 const TEXT_KEYS = {
-  greeting: 'home.greeting', overview: 'home.overview', streak: 'home.streak',
+  greeting: 'home.greeting', overview: 'home.overview',
   lastNight: 'home.lastNight', goal: 'home.goal', noRecord: 'home.noRecord',
   noRecordHint: 'home.noRecordHint', achieved: 'home.achieved',
   start: 'home.start', startHint: 'home.startHint', quality: 'home.quality',
