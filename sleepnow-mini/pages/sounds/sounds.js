@@ -1,11 +1,18 @@
 const player = require('../../core/audio-player');
 const i18n = require('../../core/i18n');
 const ALL_SOUNDS = require('../../utils/sounds-data');
+const theme = require('../../core/theme');
 
 Page({
   data: {
     title: '',
     sounds: [],
+  },
+  onLoad() {
+    theme.bind(this);
+  },
+  onUnload() {
+    theme.unbind(this);
   },
   onShow() {
     this.setData({

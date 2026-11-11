@@ -1,6 +1,7 @@
 const { cloud } = require('../../utils/cloud');
 const i18n = require('../../core/i18n');
 const auth = require('../../core/auth');
+const theme = require('../../core/theme');
 
 function todayStr() {
   const d = new Date();
@@ -24,6 +25,12 @@ Page({
     status: 'loading', logs: [], errorMsg: '', isGuest: false,
     formVisible: false,
     sleepDate: todayStr(), bedTime: '', wakeTime: '', quality: 3, note: '',
+  },
+  onLoad() {
+    theme.bind(this);
+  },
+  onUnload() {
+    theme.unbind(this);
   },
   onShow() {
     this.setData({

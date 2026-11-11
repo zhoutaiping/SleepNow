@@ -3,6 +3,7 @@ const i18n = require('../../core/i18n');
 const auth = require('../../core/auth');
 const player = require('../../core/audio-player');
 const ALL_SOUNDS = require('../../utils/sounds-data');
+const theme = require('../../core/theme');
 
 function fmt(d) {
   const p = (n) => (n < 10 ? '0' + n : '' + n);
@@ -21,6 +22,12 @@ Page({
     checkinText: '', checkedText: '',
     todayLogTitle: '', logAddBtn: '', recommendTitle: '',
     recommend: [],
+  },
+  onLoad() {
+    theme.bind(this);
+  },
+  onUnload() {
+    theme.unbind(this);
   },
   onShow() {
     this.setData({

@@ -77,4 +77,12 @@ module.exports = {
   'stats.minutes': '分',
   'stats.daysUnit': '天',
   'stats.goLog': '去记录',
+  // ===== 主题与外观 =====
+  'theme.auto': '跟随系统',
+  'theme.light': '浅色',
+  'theme.dark': '深色',
+  'theme.current': '当前主题',
+  'theme.desc': '经典黑白灰，无彩色与渐变',
+  'theme.switched': '主题已切换',
+  'common.switched': '已切换',
 };

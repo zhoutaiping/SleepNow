@@ -1,4 +1,4 @@
-<view class="page">
+<view class="page {{themeClass}}">
   <text class="card-title">{{title}}</text>
   <view class="grid">
     <view class="sound-card" wx:for="{{sounds}}" wx:key="id" bindtap="play" data-src="{{item.src}}" data-name="{{item.name}}">

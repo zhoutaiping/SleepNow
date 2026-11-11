@@ -3,6 +3,7 @@
 const { cloud } = require('../../utils/cloud');
 const i18n = require('../../core/i18n');
 const auth = require('../../core/auth');
+const theme = require('../../core/theme');
 
 const MAX_BAR_RPX = 220;        // 柱状图最高柱子（rpx）
 const MAX_SCALE_MIN = 12 * 60;  // 刻度下限 12 小时，避免单条记录把柱子撑满
@@ -42,6 +43,13 @@ Page({
     streak: 0,
     bars: [],
     maxLabel: '',
+  },
+
+  onLoad() {
+    theme.bind(this);
+  },
+  onUnload() {
+    theme.unbind(this);
   },
 
   onShow() {

@@ -77,4 +77,12 @@ module.exports = {
   'stats.minutes': 'm',
   'stats.daysUnit': 'd',
   'stats.goLog': 'Log sleep',
+  // ===== Theme & appearance =====
+  'theme.auto': 'System',
+  'theme.light': 'Light',
+  'theme.dark': 'Dark',
+  'theme.current': 'Current',
+  'theme.desc': 'Pure monochrome — no color, no gradients',
+  'theme.switched': 'Theme changed',
+  'common.switched': 'Switched',
 };

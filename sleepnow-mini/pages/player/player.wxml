@@ -1,4 +1,4 @@
-<view class="page player">
+<view class="page player {{themeClass}}">
   <view class="disc {{playing ? 'spin' : ''}}">
     <text class="disc-title">{{title}}</text>
   </view>

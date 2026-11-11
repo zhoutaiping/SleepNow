@@ -5,17 +5,32 @@
   height: 96rpx;
   border-radius: 50%;
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 40rpx;
+  font-weight: 600;
   margin-right: 24rpx;
 }
 .profile-info { flex: 1; }
 .profile-name { font-size: 32rpx; font-weight: 600; display: block; margin-bottom: 6rpx; }
-.login { background: var(--primary); color: #fff; font-size: 26rpx; padding: 0 28rpx; margin: 0; }
-.logout { background: transparent; color: var(--text-sub); font-size: 26rpx; padding: 0 28rpx; margin: 0; }
+.login {
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: 26rpx;
+  font-weight: 600;
+  padding: 0 28rpx;
+  margin: 0;
+}
+.logout {
+  background: transparent;
+  color: var(--text-sub);
+  border: 1rpx solid var(--border);
+  font-size: 26rpx;
+  padding: 0 28rpx;
+  margin: 0;
+}
 .seg { display: flex; gap: 16rpx; margin-top: 16rpx; }
 .seg-item {
   flex: 1;
@@ -23,7 +38,30 @@
   padding: 20rpx 0;
   background: var(--card);
   border: 1rpx solid var(--border);
-  border-radius: 16rpx;
+  border-radius: var(--radius-sm);
   font-size: 26rpx;
 }
-.seg-item.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+.seg-item.on {
+  background: var(--primary);
+  color: var(--on-primary);
+  border-color: var(--primary);
+  font-weight: 600;
+}
+/* 主题状态：让切换控件明确传达当前状态（含 auto 实际生效的 mode） */
+.theme-state {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid var(--divider);
+}
+.theme-state-label { font-size: 24rpx; color: var(--text-sub); }
+.theme-state-value { font-size: 24rpx; color: var(--text); font-weight: 600; }
+.theme-desc {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 22rpx;
+  color: var(--text-3);
+  line-height: 1.6;
+}

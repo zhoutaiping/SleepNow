@@ -11,17 +11,17 @@
   ],
   "window": {
     "navigationBarTitleText": "晚安开关",
-    "navigationBarBackgroundColor": "#16162a",
-    "navigationBarTextStyle": "white",
-    "backgroundColor": "#16162a",
-    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f4f4f4",
+    "backgroundTextStyle": "light",
     "darkmode": true
   },
   "tabBar": {
-    "color": "#8a8aa0",
-    "selectedColor": "#9d8cff",
-    "backgroundColor": "#16162a",
-    "borderStyle": "black",
+    "color": "#8a8a8a",
+    "selectedColor": "#111111",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
     "list": [
       { "pagePath": "pages/home/home", "text": "首页" },
       { "pagePath": "pages/sounds/sounds", "text": "音频" },

@@ -1,6 +1,7 @@
 const llm = require('../../utils/llm');
 const auth = require('../../core/auth');
 const i18n = require('../../core/i18n');
+const theme = require('../../core/theme');
 
 const HISTORY_KEY_PREFIX = 'sn_chat_history_';
 
@@ -34,6 +35,7 @@ Page({
   },
 
   onLoad() {
+    theme.bind(this);
     const identity = auth.getIdentity();
     this._lang = i18n.getLang();
     this.setData({
@@ -42,6 +44,10 @@ Page({
     });
     this.loadModels();
     this.loadHistory(identity);
+  },
+
+  onUnload() {
+    theme.unbind(this);
   },
 
   onShow() {

@@ -1,21 +1,21 @@
 .page { padding: 32rpx 32rpx 60rpx; }
 
 .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28rpx; }
-.title { font-size: 36rpx; font-weight: 600; }
+.title { font-size: 36rpx; font-weight: 700; letter-spacing: -0.5rpx; }
 .range-switch {
   display: flex;
   background: var(--card);
   border: 1rpx solid var(--border);
-  border-radius: 999rpx;
+  border-radius: var(--radius-pill);
   padding: 6rpx;
 }
 .range-item {
   padding: 10rpx 22rpx;
   font-size: 24rpx;
   color: var(--text-sub);
-  border-radius: 999rpx;
+  border-radius: var(--radius-pill);
 }
-.range-item.active { background: var(--primary); color: #fff; }
+.range-item.active { background: var(--primary); color: var(--on-primary); font-weight: 600; }
 
 .metrics { display: flex; flex-wrap: wrap; gap: 16rpx; margin-bottom: 24rpx; }
 .metric {
@@ -23,10 +23,17 @@
   box-sizing: border-box;
   background: var(--card);
   border: 1rpx solid var(--border);
-  border-radius: 20rpx;
+  border-radius: var(--radius-md);
   padding: 24rpx;
 }
-.metric-value { display: block; font-size: 40rpx; font-weight: 600; color: var(--primary); }
+.metric-value {
+  display: block;
+  font-size: 40rpx;
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.5rpx;
+}
 .metric-label { display: block; font-size: 24rpx; color: var(--text-sub); margin-top: 8rpx; }
 .unit { font-size: 24rpx; margin-left: 4rpx; }
 
@@ -57,7 +64,7 @@
 .bar {
   width: 70%;
   max-width: 28rpx;
-  border-radius: 8rpx 8rpx 0 0;
+  border-radius: 6rpx 6rpx 0 0;
   background: var(--primary);
   transition: height .3s;
 }
@@ -67,6 +74,11 @@
 .chart-foot { display: block; text-align: right; font-size: 20rpx; color: var(--text-sub); margin-top: 16rpx; }
 
 .state { text-align: center; color: var(--text-sub); padding: 60rpx 0; font-size: 28rpx; }
-.state button { margin-top: 20rpx; background: var(--primary); color: #fff; font-size: 26rpx; }
-.retry { color: var(--primary); }
+.state button {
+  margin-top: 20rpx;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: 26rpx;
+}
+.retry { color: var(--text); text-decoration: underline; font-weight: 600; }
 .guest-hint { font-size: 24rpx; color: var(--text-sub); text-align: center; padding: 24rpx; }

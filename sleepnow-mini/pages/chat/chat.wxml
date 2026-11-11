@@ -1,4 +1,4 @@
-<view class="chat-page">
+<view class="chat-page {{themeClass}}">
   <view class="chat-header">
     <text class="chat-title">{{t.chatTitle}}</text>
     <view class="header-actions">

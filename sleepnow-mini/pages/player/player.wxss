@@ -4,22 +4,25 @@
   align-items: center;
   padding-top: 80rpx;
 }
+/* 唱片：纯色 + 同心灰环，无渐变 */
 .disc {
   width: 320rpx;
   height: 320rpx;
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 40%, #9d8cff, #5b4fd6);
+  background: var(--primary);
+  border: 18rpx solid var(--surface);
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: var(--on-primary);
   text-align: center;
 }
 .disc.spin { animation: spin 8s linear infinite; }
 @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
-.disc-title { font-size: 28rpx; padding: 0 30rpx; }
+.disc-title { font-size: 28rpx; font-weight: 600; letter-spacing: 1rpx; padding: 0 30rpx; }
 .controls { display: flex; gap: 24rpx; margin: 48rpx 0; }
-.controls button { background: var(--primary); color: #fff; }
+.controls button { background: var(--primary); color: var(--on-primary); font-weight: 600; }
 .timer-box { width: 100%; padding: 0 20rpx; box-sizing: border-box; }
 .timer-row { display: flex; gap: 16rpx; margin-top: 16rpx; }
 .timer-chip {
@@ -28,7 +31,12 @@
   padding: 20rpx 0;
   background: var(--card);
   border: 1rpx solid var(--border);
-  border-radius: 16rpx;
+  border-radius: var(--radius-sm);
   font-size: 26rpx;
 }
-.timer-chip.on { background: var(--primary); color: #fff; border-color: var(--primary); }
+.timer-chip.on {
+  background: var(--primary);
+  color: var(--on-primary);
+  border-color: var(--primary);
+  font-weight: 600;
+}

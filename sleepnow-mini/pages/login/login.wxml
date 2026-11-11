@@ -1,4 +1,4 @@
-<view class="page">
+<view class="page {{themeClass}}">
   <view class="hero">
     <text class="title">{{title}}</text>
     <text class="sub">登录后数据多设备同步、长期保留</text>

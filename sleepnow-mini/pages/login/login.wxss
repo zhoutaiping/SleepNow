@@ -1,12 +1,13 @@
 .page { padding: 48rpx 40rpx; }
 .hero { margin-bottom: 56rpx; }
-.title { display: block; font-size: 44rpx; font-weight: 600; }
-.sub { display: block; margin-top: 12rpx; color: var(--text-sub); font-size: 26rpx; }
+.title { display: block; font-size: 44rpx; font-weight: 700; letter-spacing: -1rpx; }
+.sub { display: block; margin-top: 12rpx; color: var(--text-sub); font-size: 26rpx; line-height: 1.6; }
 .primary {
   background: var(--primary);
-  color: #fff;
+  color: var(--on-primary);
   font-size: 30rpx;
-  border-radius: 16rpx;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
   margin-bottom: 32rpx;
 }
 .divider {
@@ -28,8 +29,9 @@
 .divider::after { right: 0; }
 .phone-input, .code-row { display: flex; align-items: center; gap: 16rpx; }
 .phone-input {
-  background: var(--bg);
-  border-radius: 16rpx;
+  background: var(--card);
+  border: 1rpx solid var(--border);
+  border-radius: var(--radius-sm);
   padding: 0 24rpx;
   height: 92rpx;
 }
@@ -37,17 +39,21 @@
 .input, .code-input {
   flex: 1;
   height: 92rpx;
-  background: var(--bg);
-  border-radius: 16rpx;
+  background: var(--card);
+  border: 1rpx solid var(--border);
+  border-radius: var(--radius-sm);
   padding: 0 24rpx;
   font-size: 28rpx;
+  color: var(--text);
   box-sizing: border-box;
 }
+.phone-input .input { background: transparent; border: none; }
 .code-row { margin-top: 20rpx; }
 .code-btn {
   flex: 0 0 auto;
-  background: var(--primary-soft);
-  color: var(--primary);
+  background: var(--surface);
+  color: var(--text);
+  border: 1rpx solid var(--border);
   font-size: 26rpx;
   padding: 0 24rpx;
   height: 92rpx;
@@ -55,7 +61,16 @@
   margin: 0;
 }
 .code-btn[disabled] { opacity: 0.5; }
-.err { display: block; color: #e54545; font-size: 24rpx; margin: 12rpx 4rpx 0; }
+.err {
+  display: block;
+  color: var(--text);
+  background: var(--surface);
+  border-left: 4rpx solid var(--text);
+  border-radius: var(--radius-sm);
+  padding: 16rpx 20rpx;
+  font-size: 24rpx;
+  margin: 12rpx 0 0;
+}
 .guest {
   margin-top: 64rpx;
   background: transparent;

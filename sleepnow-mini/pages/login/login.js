@@ -1,5 +1,6 @@
 const i18n = require('../../core/i18n');
 const auth = require('../../core/auth');
+const theme = require('../../core/theme');
 
 Page({
   data: {
@@ -17,6 +18,7 @@ Page({
     challenge: null,
   },
   onLoad() {
+    theme.bind(this);
     this.setData({
       title: i18n.t('login.title'),
       wechatText: i18n.t('login.wechat'),
@@ -26,6 +28,7 @@ Page({
     this._timer = null;
   },
   onUnload() {
+    theme.unbind(this);
     if (this._timer) clearInterval(this._timer);
   },
   async onWechat() {

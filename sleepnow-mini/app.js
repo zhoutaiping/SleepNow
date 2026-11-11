@@ -18,4 +18,8 @@ App({
       return cloud.auth.getSession();
     })();
   },
+  // 系统深色模式变化：auto 模式下自动跟随（需 app.json 开启 darkmode）
+  onThemeChange(res) {
+    theme.onSystemThemeChange(res && res.theme);
+  },
 });

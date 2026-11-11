@@ -1,4 +1,4 @@
-<view class="page">
+<view class="page {{themeClass}}">
   <view class="card profile">
     <text class="avatar">{{user ? (user.name ? user.name[0] : (user.phone ? user.phone[0] : '?')) : '游'}}</text>
     <view class="profile-info">
@@ -21,10 +21,15 @@
   <view class="card">
     <text class="card-title">{{themeText}}</text>
     <view class="seg">
-      <view class="seg-item {{theme === 'auto' ? 'on' : ''}}" bindtap="switchTheme" data-theme="auto"><text>跟随系统</text></view>
-      <view class="seg-item {{theme === 'light' ? 'on' : ''}}" bindtap="switchTheme" data-theme="light"><text>浅色</text></view>
-      <view class="seg-item {{theme === 'dark' ? 'on' : ''}}" bindtap="switchTheme" data-theme="dark"><text>深色</text></view>
+      <view class="seg-item {{theme === 'auto' ? 'on' : ''}}" bindtap="switchTheme" data-theme="auto"><text>{{themeAuto}}</text></view>
+      <view class="seg-item {{theme === 'light' ? 'on' : ''}}" bindtap="switchTheme" data-theme="light"><text>{{themeLight}}</text></view>
+      <view class="seg-item {{theme === 'dark' ? 'on' : ''}}" bindtap="switchTheme" data-theme="dark"><text>{{themeDark}}</text></view>
     </view>
+    <view class="theme-state">
+      <text class="theme-state-label">{{themeCurrent}}</text>
+      <text class="theme-state-value">{{themeState}}</text>
+    </view>
+    <text class="theme-desc">{{themeDesc}}</text>
   </view>
 
   <view class="card">

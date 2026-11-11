@@ -1,5 +1,6 @@
 const player = require('../../core/audio-player');
 const i18n = require('../../core/i18n');
+const theme = require('../../core/theme');
 
 Page({
   data: {
@@ -9,6 +10,12 @@ Page({
     activeMin: 0,
     stopText: '',
     timerTitle: '',
+  },
+  onLoad() {
+    theme.bind(this);
+  },
+  onUnload() {
+    theme.unbind(this);
   },
   onShow() {
     player.onProgress((cur, dur) => {
