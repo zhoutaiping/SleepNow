@@ -1,42 +1,49 @@
-.page { padding: 32rpx; }
-.hero { padding: 20rpx 0 40rpx; }
-.hero-title {
-  display: block;
-  font-size: 46rpx;
-  font-weight: 700;
-  letter-spacing: -1rpx;
-  line-height: 1.35;
-}
-.hero-sub {
-  display: block;
-  margin-top: 12rpx;
-  color: var(--text-sub);
-  font-size: 26rpx;
-  line-height: 1.6;
-}
-.card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16rpx; }
-.sound-row { display: flex; flex-wrap: wrap; gap: 16rpx; margin-top: 16rpx; }
-.sound-chip {
-  background: var(--surface);
-  color: var(--text);
-  border: 1rpx solid var(--border);
-  padding: 16rpx 30rpx;
+.topbar { padding: 12rpx 0 32rpx; }
+.hero-title { margin-top: 14rpx; }
+.hero-sub-line { display: block; margin-top: 14rpx; font-size: 24rpx; color: var(--text-sub); }
+
+/* Hero 环形：24 段小条绕中心排布，无渐变、无彩色 */
+.hero-head { display: flex; justify-content: space-between; align-items: baseline; }
+.ring { position: relative; width: 300rpx; height: 300rpx; margin: 20rpx auto 8rpx; }
+.ring-seg {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 8rpx; height: 30rpx;
+  margin: -15rpx 0 0 -4rpx;
   border-radius: var(--radius-pill);
-  font-size: 26rpx;
+  background: var(--on-primary-dim);
+  transform-origin: 50% 50%;
 }
-.streak-box { display: flex; align-items: center; gap: 20rpx; margin-top: 14rpx; }
-.checkin-btn {
-  background: var(--primary);
-  color: var(--on-primary);
-  font-size: 24rpx;
-  font-weight: 600;
-  padding: 0 28rpx;
-  margin: 0;
-  line-height: 56rpx;
-  height: 56rpx;
+.ring-seg.on { background: var(--on-primary); }
+.ring-center {
+  position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
-.checkin-btn.done {
-  background: var(--surface);
-  color: var(--text-sub);
+.ring-value { font-size: 42rpx; font-weight: 700; letter-spacing: -1rpx; }
+.ring-caption { font-size: 20rpx; margin-top: 10rpx; color: var(--on-primary-dim); }
+.hero-meta { display: flex; justify-content: space-between; font-size: 22rpx; padding: 4rpx 0 28rpx; }
+.hero-btn-hint { display: block; text-align: center; font-size: 20rpx; margin-top: 16rpx; color: var(--on-primary-dim); }
+
+/* 横向助眠卡片 */
+.sound-scroll { width: 100%; white-space: nowrap; }
+.sound-card {
+  display: inline-block;
+  position: relative;
+  width: 240rpx; height: 220rpx;
+  margin-right: 16rpx;
+  padding: 24rpx;
+  box-sizing: border-box;
+  vertical-align: top;
+  white-space: normal;
+  background: var(--card);
   border: 1rpx solid var(--border);
+  border-radius: var(--radius-md);
 }
+.sound-no { font-size: 22rpx; color: var(--text-3); }
+.sound-play { position: absolute; right: 24rpx; top: 24rpx; font-size: 20rpx; }
+.sound-card-bottom { position: absolute; left: 24rpx; right: 24rpx; bottom: 24rpx; }
+.sound-name { display: block; font-size: 30rpx; font-weight: 700; }
+.sound-desc { display: block; font-size: 20rpx; color: var(--text-sub); margin-top: 8rpx; }
+
+/* 首页空态比通用样式更轻：标题用次级灰 */
+.empty-panel .empty-title { color: var(--text-sub); font-size: 26rpx; font-weight: 500; }

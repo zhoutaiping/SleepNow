@@ -72,10 +72,48 @@ emoji 当图标、每页单独调色、硬编码色值。
 - 动效 150~300ms；`prefers-reduced-motion` 下关闭唱片旋转与柱状图过渡
 - 空/错/加载三态齐全；错误仅用灰阶 + 左侧强调条表达，不用红色
 
-## 6. 交付前检查
+## 6. 布局范式（v1.1 · 健身 App Dashboard）
+
+参照 Keep / Apple 健身等产品的信息架构，解决 1.0 版本的三个布局问题：
+**信息密度过低**（下半屏全空）、**每卡一个大黑按钮**（视觉重复且抢焦点）、
+**没有数据主视觉**（用户看不到自己的睡眠节律）。
+
+### 三页信息架构
+
+| 页面 | 从上到下的层级 | 唯一强焦点 |
+|------|---------------|-----------|
+| 首页 | 日期 + 问候 → 睡眠环形 Hero → 2×2 指标网格 → 近 7 天打卡条 → 横向助眠卡 → 最近活动列表 | 反相 Hero 卡 |
+| 记录 | 标题独占一行 + 小 pill → 周日历条 → 三列概览 → 快捷操作行 → 全部记录活动列表 | 周日历条 |
+| 我的 | 反相身份 Hero → 三列成就数据 → 外观分组 → 更多列表 → 页脚 | 身份 Hero |
+
+**规则**：每页最多一个反相大卡；按钮只保留 pill / 列表行 / 卡内 CTA 三种形态，
+不再出现「每张卡一个整宽大黑按钮」。空态也必须保留周条与概览，页面不得整片留白。
+
+### 通用组件（`app.wxss` 统一定义）
+
+`.hero-panel` / `.hero-btn`、`.section`、`.metric-grid`+`.metric`、
+`.week-strip`+`.week-col`+`.week-dot`、`.overview-panel`+`.ov-item`、
+`.row`+`.row-arrow`、`.activity`+`.dots`、`.empty-panel`、`.pill`。
+各页面 wxss 只写自身特有布局，不允许重复定义通用组件。
+
+### 环形进度
+
+24 段小条用 `transform: rotate() translateY()` 绕中心排布，
+激活段 `--on-primary`、未激活段 `--on-primary-dim`（新增 token，仅定义在两个 mode 块）。
+纯 view 实现，不用 canvas / 渐变，兼容 WebView 与 Skyline。
+
+### 数据层
+
+`utils/dashboard.js` 为纯函数（无 wx / 云端依赖），统一提供日期序列、周条构造、
+同日取均值的聚合、活动列表格式化。三页共用，统计口径与 `stats` 页一致。
+日期一律用 `new Date(y, m-1, d)` 本地构造，避免 `YYYY-MM-DD` 被按 UTC 解析错开一天。
+
+## 7. 交付前检查
 
 - [ ] 全工程 `*.wxss` 无 `#RRGGBB` / `rgb()` / `gradient` 硬编码（仅 `app.wxss` 例外）
 - [ ] 每个 `var(--primary)` 背景都有对应 `--on-primary` 文字
 - [ ] 8 个页面根 view 均绑定 `{{themeClass}}`，js 均 `bind/unbind`
 - [ ] 浅色与深色分别检查文字对比度、边框可见性、tabBar 选中态
-- [ ] `node scripts/check-theme.js` 全绿（静态一致性 + 三态切换逻辑共 21 项）
+- [ ] `node scripts/check-theme.js` 全绿（静态一致性 + 三态切换逻辑）
+- [ ] `node scripts/check-dashboard.js` 全绿（聚合纯函数 + 三页渲染分支，共 28 项）
+- [ ] 新增 `{{t.xxx}}` 均已由页面 `TEXT_KEYS` 注入，且 zh/en 词条对齐

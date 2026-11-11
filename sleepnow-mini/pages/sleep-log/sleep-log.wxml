@@ -1,53 +1,114 @@
 <view class="page {{themeClass}}">
+  <!-- 标题独占一行，右上只留一个小 pill，不再出现两按钮挤压换行 -->
   <view class="head">
-    <text class="title">{{title}}</text>
-    <view class="head-actions">
-      <button class="stats-btn" bindtap="goStats">{{statsText}}</button>
-      <button class="add-btn" bindtap="openForm">+ {{addText}}</button>
+    <view class="head-text">
+      <text class="eyebrow">{{t.subtitle}}</text>
+      <text class="big-title">{{t.title}}</text>
+    </view>
+    <button class="add-pill" bindtap="openForm">+ {{t.add}}</button>
+  </view>
+
+  <!-- 近 7 天周视图：空态下也有内容，页面不再一片空白 -->
+  <view class="panel week-panel">
+    <text class="panel-label">{{t.week}}</text>
+    <view class="week-strip">
+      <view class="week-col {{item.isToday ? 'today' : ''}}" wx:for="{{week}}" wx:key="date">
+        <text class="week-day">{{item.weekday}}</text>
+        <text class="week-num num">{{item.dayNum}}</text>
+        <view class="week-dot {{item.hasLog ? 'on' : ''}} {{item.isToday ? 'today' : ''}}"></view>
+      </view>
     </view>
   </view>
 
-  <view wx:if="{{status === 'loading'}}" class="state">加载中…</view>
+  <!-- 本周概览：紧凑三列，不占大卡 -->
+  <view class="panel overview-panel">
+    <view class="ov-item">
+      <text class="ov-label">{{t.avg}}</text>
+      <text class="ov-value num">{{overview.avg}}</text>
+    </view>
+    <view class="ov-item">
+      <text class="ov-label">{{t.days}}</text>
+      <text class="ov-value num">{{overview.days}}</text>
+    </view>
+    <view class="ov-item">
+      <text class="ov-label">{{t.coverage}}</text>
+      <text class="ov-value num">{{overview.coverage}}</text>
+    </view>
+  </view>
+
+  <!-- 快捷操作：分组列表行，替代满屏大黑按钮 -->
+  <view class="panel quick-panel">
+    <view class="row" bindtap="goStats">
+      <view class="row-icon">▥</view>
+      <view class="row-body">
+        <text class="row-title">{{t.stats}}</text>
+        <text class="row-desc">{{t.statsDesc}}</text>
+      </view>
+      <view class="row-arrow"></view>
+    </view>
+    <view class="row" bindtap="openForm">
+      <view class="row-icon">+</view>
+      <view class="row-body">
+        <text class="row-title">{{t.add}}</text>
+        <text class="row-desc">{{t.addDesc}}</text>
+      </view>
+      <view class="row-arrow"></view>
+    </view>
+  </view>
+
+  <view class="section">
+    <text class="section-title">{{t.all}} · {{total}}</text>
+  </view>
+
+  <view wx:if="{{status === 'loading'}}" class="state">{{t.loading}}…</view>
   <view wx:elif="{{status === 'error'}}" class="state">
     <text>{{errorMsg}}</text>
-    <button bindtap="retry">重试</button>
+    <button class="state-btn" bindtap="retry">{{t.retry}}</button>
   </view>
-  <view wx:elif="{{status === 'empty'}}" class="state">
-    <text>{{logEmpty}}</text>
-    <button bindtap="openForm">记录第一条</button>
+  <view wx:elif="{{status === 'empty'}}" class="panel empty-panel" bindtap="openForm">
+    <text class="empty-title">{{t.firstTitle}}</text>
+    <text class="empty-hint">{{t.firstHint}}</text>
+    <text class="empty-link">{{t.goLog}} ›</text>
   </view>
-  <view wx:else class="list">
-    <view class="log-item" wx:for="{{logs}}" wx:key="id">
-      <view>
-        <text class="log-date">{{item.date}}</text>
-        <text class="log-time">{{item.time}}</text>
+  <view wx:else class="panel">
+    <view class="activity" wx:for="{{logs}}" wx:key="id">
+      <view class="activity-date">
+        <text class="activity-day num">{{item.dateLabel}}</text>
+        <text class="activity-week">{{item.weekday}}</text>
       </view>
-      <view class="log-meta">
-        <text class="log-rating">★ {{item.quality}}</text>
-        <text class="log-duration" wx:if="{{item.duration}}">· {{item.duration}} 分钟</text>
+      <view class="activity-body">
+        <text class="activity-time num">{{item.time}}</text>
+        <view class="dots">
+          <view class="dot {{d.on ? 'on' : ''}}" wx:for="{{item.qualityDots}}" wx:for-item="d" wx:key="k"></view>
+        </view>
       </view>
+      <text class="activity-duration num">{{item.durationShort}}</text>
     </view>
   </view>
 
+  <text class="guest-hint" wx:if="{{isGuest}}">{{t.guestHint}}</text>
+
+  <!-- 记录表单（逻辑不变，仅承载容器） -->
   <view wx:if="{{formVisible}}" class="modal">
     <view class="modal-card">
-      <text class="modal-title">{{addText}}</text>
+      <text class="modal-title">{{t.add}}</text>
       <picker mode="date" value="{{sleepDate}}" bindchange="onDate">
-        <view class="field">{{dateLabel}}：{{sleepDate}}</view>
+        <view class="field">{{t.date}}：{{sleepDate}}</view>
       </picker>
       <picker mode="time" value="{{bedTime}}" bindchange="onBedTime">
-        <view class="field">{{bedtimeLabel}}：{{bedTime || '选择'}}</view>
+        <view class="field">{{t.bedtime}}：{{bedTime || '--:--'}}</view>
       </picker>
       <picker mode="time" value="{{wakeTime}}" bindchange="onWakeTime">
-        <view class="field">{{wakeLabel}}：{{wakeTime || '选择'}}</view>
+        <view class="field">{{t.wake}}：{{wakeTime || '--:--'}}</view>
       </picker>
       <view class="rating-row">
-        <text wx:for="{{[1,2,3,4,5]}}" wx:key="*this" class="star {{quality >= item ? 'on' : ''}}" bindtap="onQuality" data-value="{{item}}">★</text>
+        <text wx:for="{{[1,2,3,4,5]}}" wx:key="*this" class="star {{quality >= item ? 'on' : ''}}"
+              bindtap="onQuality" data-value="{{item}}">★</text>
       </view>
-      <textarea class="note-field" placeholder="{{noteLabel}}" value="{{note}}" bindinput="onNote" />
+      <textarea class="note-field" placeholder="{{t.note}}" value="{{note}}" bindinput="onNote" />
       <view class="modal-actions">
-        <button bindtap="closeForm">{{cancelText}}</button>
-        <button type="primary" bindtap="save">{{saveText}}</button>
+        <button bindtap="closeForm">{{t.cancel}}</button>
+        <button bindtap="save">{{t.save}}</button>
       </view>
     </view>
   </view>

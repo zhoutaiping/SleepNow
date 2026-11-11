@@ -1,37 +1,37 @@
-.page { padding: 32rpx; }
-.profile { display: flex; align-items: center; }
+.mine-eyebrow { margin: 12rpx 0 20rpx; }
+
+/* 身份 Hero */
+.profile-hero { padding: 36rpx; }
+.profile-top { display: flex; align-items: center; }
 .avatar {
-  width: 96rpx;
-  height: 96rpx;
-  border-radius: 50%;
-  background: var(--primary);
+  width: 112rpx; height: 112rpx;
+  flex: none;
+  margin-right: 28rpx;
+  border-radius: var(--radius-pill);
+  border: 2rpx solid var(--on-primary);
   color: var(--on-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 40rpx;
-  font-weight: 600;
-  margin-right: 24rpx;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 46rpx; font-weight: 700;
+  box-sizing: border-box;
 }
-.profile-info { flex: 1; }
-.profile-name { font-size: 32rpx; font-weight: 600; display: block; margin-bottom: 6rpx; }
-.login {
-  background: var(--primary);
-  color: var(--on-primary);
-  font-size: 26rpx;
-  font-weight: 600;
-  padding: 0 28rpx;
-  margin: 0;
-}
-.logout {
+.profile-info { flex: 1; min-width: 0; }
+.profile-name { display: block; font-size: 38rpx; font-weight: 700; letter-spacing: -0.5rpx; }
+.profile-desc { display: block; font-size: 22rpx; color: var(--on-primary-dim); margin-top: 10rpx; line-height: 1.5; }
+.profile-cta { margin-top: 32rpx; height: 84rpx; line-height: 84rpx; }
+.hero-btn-ghost {
   background: transparent;
-  color: var(--text-sub);
-  border: 1rpx solid var(--border);
-  font-size: 26rpx;
-  padding: 0 28rpx;
-  margin: 0;
+  color: var(--on-primary);
+  border: 2rpx solid var(--on-primary);
+  box-sizing: border-box;
 }
-.seg { display: flex; gap: 16rpx; margin-top: 16rpx; }
+
+/* 成就数据 */
+.ov-unit { font-size: 20rpx; font-weight: 500; color: var(--text-sub); margin-left: 4rpx; letter-spacing: 0; }
+
+/* 外观分组 */
+.setting-card { padding: 32rpx; }
+.group-label { display: block; font-size: 24rpx; font-weight: 600; color: var(--text-sub); }
+.seg { display: flex; gap: 16rpx; margin-top: 18rpx; }
 .seg-item {
   flex: 1;
   text-align: center;
@@ -47,21 +47,15 @@
   border-color: var(--primary);
   font-weight: 600;
 }
-/* 主题状态：让切换控件明确传达当前状态（含 auto 实际生效的 mode） */
+.seg-divider { height: 1rpx; background: var(--divider); margin: 32rpx 0; }
 .theme-state {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 24rpx;
+  margin-top: 28rpx;
   padding-top: 20rpx;
   border-top: 1rpx solid var(--divider);
 }
 .theme-state-label { font-size: 24rpx; color: var(--text-sub); }
 .theme-state-value { font-size: 24rpx; color: var(--text); font-weight: 600; }
-.theme-desc {
-  display: block;
-  margin-top: 12rpx;
-  font-size: 22rpx;
-  color: var(--text-3);
-  line-height: 1.6;
-}
+.theme-desc { display: block; margin-top: 12rpx; font-size: 22rpx; color: var(--text-3); line-height: 1.6; }

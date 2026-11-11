@@ -1,27 +1,115 @@
 <view class="page {{themeClass}}">
-  <view class="hero">
-    <text class="hero-title">{{greeting}}</text>
-    <view class="streak-box">
-      <text class="hero-sub">{{streakText}} {{streak}} 天</text>
-      <button class="checkin-btn {{checkedToday ? 'done' : ''}}" bindtap="checkin" disabled="{{checkedToday}}">
-        {{checkedToday ? checkedText : checkinText}}
-      </button>
+  <!-- 顶部：日期 + 问候 + 连续签到，纯文字层级，不再放大按钮 -->
+  <view class="topbar">
+    <text class="eyebrow">{{todayLabel}}</text>
+    <text class="big-title hero-title">{{t.greeting}}</text>
+    <text class="hero-sub-line">{{t.streak}} {{streak}} {{t.unitDay}}</text>
+  </view>
+
+  <!-- Hero：反相睡眠环形，整页唯一强焦点 -->
+  <view class="hero-panel">
+    <view class="hero-head">
+      <text class="eyebrow">{{t.lastNight}}</text>
+      <text class="eyebrow">{{t.goal}}</text>
+    </view>
+    <view class="ring">
+      <view class="ring-seg {{item.on ? 'on' : ''}}" wx:for="{{ringSegs}}" wx:key="i"
+            style="transform: rotate({{item.deg}}deg) translateY(-118rpx);"></view>
+      <view class="ring-center">
+        <text class="ring-value num">{{hasLast ? ringValue : t.noRecord}}</text>
+        <text class="ring-caption">{{hasLast ? ringPercent + '% ' + t.achieved : t.noRecordHint}}</text>
+      </view>
+    </view>
+    <view class="hero-meta" wx:if="{{hasLast}}">
+      <text class="num">{{lastTime}}</text>
+      <text>{{t.quality}} {{lastQuality}}/5</text>
+    </view>
+    <button class="hero-btn" bindtap="startPlay">{{t.start}}</button>
+    <text class="hero-btn-hint">{{t.startHint}}</text>
+  </view>
+
+  <!-- 指标网格 -->
+  <view class="section">
+    <text class="section-title">{{t.overview}}</text>
+    <text class="section-more" bindtap="goStats">{{t.viewAll}} ›</text>
+  </view>
+  <view class="metric-grid">
+    <view class="metric">
+      <text class="metric-label">{{t.metricAvg}}</text>
+      <text class="metric-value num">{{metrics.avg}}<text class="metric-unit">{{t.unitHour}}</text></text>
+    </view>
+    <view class="metric">
+      <text class="metric-label">{{t.metricDays}}</text>
+      <text class="metric-value num">{{metrics.days}}<text class="metric-unit">{{t.unitDay}}</text></text>
+    </view>
+    <view class="metric">
+      <text class="metric-label">{{t.metricStreak}}</text>
+      <text class="metric-value num">{{metrics.streak}}<text class="metric-unit">{{t.unitDay}}</text></text>
+    </view>
+    <view class="metric">
+      <text class="metric-label">{{t.metricQuality}}</text>
+      <text class="metric-value num">{{metrics.quality}}<text class="metric-unit">/5</text></text>
     </view>
   </view>
 
-  <view class="card">
-    <view class="card-head">
-      <text class="card-title">{{todayLogTitle}}</text>
-    </view>
-    <button class="cta" bindtap="goLog">{{logAddBtn}}</button>
+  <!-- 近 7 天打卡条 -->
+  <view class="section">
+    <text class="section-title">{{t.weekCheckin}}</text>
+    <button class="pill {{checkedToday ? 'pill-done' : 'pill-solid'}}" bindtap="checkin" disabled="{{checkedToday}}">
+      {{checkedToday ? t.checked : t.checkin}}
+    </button>
   </view>
-
-  <view class="card">
-    <text class="card-title">{{recommendTitle}}</text>
-    <view class="sound-row">
-      <view class="sound-chip" wx:for="{{recommend}}" wx:key="id" bindtap="playSound" data-src="{{item.src}}" data-title="{{item.name}}">
-        <text>{{item.name}}</text>
+  <view class="panel">
+    <view class="week-strip">
+      <view class="week-col {{item.isToday ? 'today' : ''}}" wx:for="{{week}}" wx:key="date">
+        <text class="week-day">{{item.weekday}}</text>
+        <text class="week-num num">{{item.dayNum}}</text>
+        <view class="week-dot {{item.checked ? 'on' : ''}} {{item.isToday ? 'today' : ''}}"></view>
       </view>
     </view>
   </view>
+
+  <!-- 助眠推荐：横向卡片，替代四个灰色 chip -->
+  <view class="section">
+    <text class="section-title">{{t.recommend}}</text>
+    <text class="section-more" bindtap="goSounds">{{t.viewAll}} ›</text>
+  </view>
+  <scroll-view class="sound-scroll" scroll-x>
+    <view class="sound-card" wx:for="{{recommend}}" wx:key="id" bindtap="playSound"
+          data-src="{{item.src}}" data-title="{{item.name}}">
+      <text class="sound-no num">{{item.no}}</text>
+      <text class="sound-play">▶</text>
+      <view class="sound-card-bottom">
+        <text class="sound-name">{{item.name}}</text>
+        <text class="sound-desc">{{item.desc}}</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 最近记录：活动列表 -->
+  <view class="section">
+    <text class="section-title">{{t.recent}}</text>
+    <text class="section-more" bindtap="goLog">{{t.viewAll}} ›</text>
+  </view>
+  <view class="panel" wx:if="{{recent.length}}">
+    <view class="activity" wx:for="{{recent}}" wx:key="id">
+      <view class="activity-date">
+        <text class="activity-day num">{{item.dateLabel}}</text>
+        <text class="activity-week">{{item.weekday}}</text>
+      </view>
+      <view class="activity-body">
+        <text class="activity-time num">{{item.time}}</text>
+        <view class="dots">
+          <view class="dot {{d.on ? 'on' : ''}}" wx:for="{{item.qualityDots}}" wx:for-item="d" wx:key="k"></view>
+        </view>
+      </view>
+      <text class="activity-duration num">{{item.durationShort}}</text>
+    </view>
+  </view>
+  <view class="panel empty-panel" wx:else bindtap="goLog">
+    <text class="empty-title">{{t.recentEmpty}}</text>
+    <text class="empty-link">{{t.goLog}} ›</text>
+  </view>
+
+  <text class="footer-note">{{t.footer}}</text>
 </view>

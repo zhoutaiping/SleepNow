@@ -1,39 +1,29 @@
-.page { padding: 32rpx; }
-.head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24rpx; }
-.title { font-size: 36rpx; font-weight: 700; letter-spacing: -0.5rpx; }
-.add-btn {
+.head { display: flex; justify-content: space-between; align-items: flex-end; padding: 12rpx 0 32rpx; }
+.head-text { flex: 1; min-width: 0; }
+.head-text .big-title { margin-top: 12rpx; font-size: 44rpx; }
+.add-pill {
+  flex: none;
   background: var(--primary);
   color: var(--on-primary);
-  font-size: 26rpx;
+  font-size: 24rpx;
   font-weight: 600;
-  padding: 0 28rpx;
-  margin: 0;
+  height: 64rpx;
+  line-height: 64rpx;
+  padding: 0 26rpx;
+  margin: 0 0 4rpx 20rpx;
+  border-radius: var(--radius-pill);
 }
-.head-actions { display: flex; align-items: center; gap: 12rpx; }
-.stats-btn {
-  background: var(--surface);
-  color: var(--text);
-  border: 1rpx solid var(--border);
-  font-size: 26rpx;
-  padding: 0 24rpx;
-  margin: 0;
-}
-.list { display: flex; flex-direction: column; gap: 16rpx; }
-.log-item {
-  background: var(--card);
-  border: 1rpx solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 24rpx;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.state { text-align: center; color: var(--text-sub); padding: 80rpx 0; }
-.state button {
-  margin-top: 20rpx;
-  background: var(--primary);
-  color: var(--on-primary);
-}
+
+.panel-label { display: block; font-size: 22rpx; color: var(--text-sub); margin-bottom: 24rpx; }
+.week-panel { margin-bottom: 16rpx; }
+
+.overview-panel { margin-bottom: 16rpx; }
+.quick-panel { padding: 8rpx 32rpx; }
+.state { padding: 48rpx 0; }
+.state-btn { margin-top: 20rpx; background: var(--primary); color: var(--on-primary); }
+.guest-hint { display: block; font-size: 20rpx; color: var(--text-3); text-align: center; margin-top: 32rpx; }
+
+/* 记录表单 */
 .modal {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -64,11 +54,6 @@
 .modal-actions { display: flex; gap: 20rpx; }
 .modal-actions button { flex: 1; }
 .modal-actions button:last-child { background: var(--primary); color: var(--on-primary); font-weight: 600; }
-.log-date { display: block; font-size: 28rpx; font-weight: 600; }
-.log-time { display: block; font-size: 24rpx; color: var(--text-sub); margin-top: 6rpx; }
-.log-meta { display: flex; flex-direction: column; align-items: flex-end; }
-.log-rating { font-size: 26rpx; color: var(--text); }
-.log-duration { font-size: 22rpx; color: var(--text-sub); margin-top: 4rpx; }
 .note-field {
   width: 100%;
   background: var(--bg);

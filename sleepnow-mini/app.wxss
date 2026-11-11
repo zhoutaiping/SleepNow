@@ -7,6 +7,10 @@
    3. --primary 与 --on-primary 必须成对使用，保证两种模式下文字对比度
    4. 无彩色、无渐变、无彩色阴影；层次只靠灰阶 + 1rpx 边框 + 字重
    5. --text-2 / --text-3 为历史别名，与 --text-sub 同灰阶，禁止再引入新别名
+   --------------------------------------------------------------------------
+   布局范式（v1.1）：健身类 App 的 Dashboard 结构
+   今日概览 Hero → 指标网格 → 近 7 天周条 → 活动列表 → 分组设置
+   通用组件统一放本文件，各页面 wxss 只写自身特有布局
    ========================================================================== */
 
 page {
@@ -33,6 +37,7 @@ page {
   --divider: #e4e4e4;
   --primary: #111111;
   --on-primary: #ffffff;
+  --on-primary-dim: #5a5a5a;   /* 反相 Hero 卡上未点亮的环形段 */
   --primary-soft: #e8e8e8;
   --scrim: rgba(0, 0, 0, 0.45);
   background: var(--bg);
@@ -53,6 +58,7 @@ page {
   --divider: #2a2a2a;
   --primary: #f2f2f2;
   --on-primary: #0b0b0b;
+  --on-primary-dim: #8a8a8a;   /* 反相 Hero 卡（白底）上未点亮的环形段 */
   --primary-soft: #2b2b2b;
   --scrim: rgba(0, 0, 0, 0.68);
   background: var(--bg);
@@ -68,7 +74,7 @@ button {
 button::after { border: none; } /* 去掉小程序默认 1px 边框，保持黑白克制 */
 
 .page {
-  padding: 32rpx;
+  padding: 32rpx 32rpx 56rpx;
   box-sizing: border-box;
   min-height: 100vh;
 }
@@ -112,6 +118,181 @@ button::after { border: none; } /* 去掉小程序默认 1px 边框，保持黑�
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.5rpx;
 }
+
+/* ---------- Dashboard 通用组件（健身 App 范式） ---------- */
+.eyebrow {
+  font-size: 22rpx;
+  letter-spacing: 2rpx;
+  color: var(--text-sub);
+  line-height: 1.5;
+}
+
+.big-title {
+  display: block;
+  font-size: 46rpx;
+  font-weight: 700;
+  letter-spacing: -1rpx;
+  line-height: 1.3;
+}
+
+.section {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 44rpx 0 20rpx;
+}
+.section-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  letter-spacing: -0.3rpx;
+}
+.section-more {
+  font-size: 24rpx;
+  color: var(--text-sub);
+}
+
+.panel {
+  background: var(--card);
+  border: 1rpx solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32rpx;
+  box-sizing: border-box;
+}
+
+/* 反相 Hero 卡：整页唯一的强视觉焦点 */
+.hero-panel {
+  background: var(--primary);
+  color: var(--on-primary);
+  border-radius: var(--radius-lg);
+  padding: 36rpx;
+  box-sizing: border-box;
+}
+.hero-panel .eyebrow { color: var(--on-primary-dim); }
+.hero-panel .hero-sub { color: var(--on-primary-dim); font-size: 22rpx; }
+
+/* 反相卡上的按钮：二次反相，避免与卡面同色 */
+.hero-btn {
+  background: var(--on-primary);
+  color: var(--primary);
+  font-size: 28rpx;
+  font-weight: 700;
+  letter-spacing: 1rpx;
+  line-height: 92rpx;
+  height: 92rpx;
+  margin: 0;
+  border-radius: var(--radius-md);
+}
+
+/* 2 列指标网格：不用 grid，兼容 WebView / Skyline 双渲染 */
+.metric-grid { display: flex; flex-wrap: wrap; gap: 16rpx; }
+.metric {
+  width: calc((100% - 16rpx) / 2);
+  box-sizing: border-box;
+  background: var(--card);
+  border: 1rpx solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 26rpx;
+}
+.metric-label { font-size: 22rpx; color: var(--text-sub); }
+.metric-value {
+  display: block;
+  margin-top: 12rpx;
+  font-size: 46rpx;
+  font-weight: 700;
+  letter-spacing: -1.5rpx;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.metric-unit { font-size: 22rpx; font-weight: 500; color: var(--text-sub); margin-left: 6rpx; letter-spacing: 0; }
+
+/* 近 7 天周条 */
+.week-strip { display: flex; justify-content: space-between; margin-top: 8rpx; }
+.week-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 10rpx; }
+.week-day { font-size: 22rpx; color: var(--text-sub); }
+.week-num {
+  width: 56rpx; height: 56rpx;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-pill);
+  font-size: 26rpx; font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.week-col.today .week-num { background: var(--primary); color: var(--on-primary); }
+.week-dot { width: 14rpx; height: 14rpx; border-radius: var(--radius-pill); background: var(--border); }
+.week-dot.on { background: var(--text); }
+.week-dot.today { border: 3rpx solid var(--text-sub); box-sizing: border-box; width: 20rpx; height: 20rpx; }
+
+/* 分组列表行 */
+.row {
+  display: flex;
+  align-items: center;
+  padding: 26rpx 0;
+  border-bottom: 1rpx solid var(--divider);
+}
+.row:last-child { border-bottom: none; }
+.row-icon {
+  width: 60rpx; height: 60rpx;
+  flex: none;
+  margin-right: 20rpx;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28rpx; font-weight: 700;
+}
+.row-body { flex: 1; min-width: 0; }
+.row-title { display: block; font-size: 28rpx; font-weight: 600; }
+.row-desc { display: block; font-size: 22rpx; color: var(--text-sub); margin-top: 6rpx; line-height: 1.5; }
+.row-value { font-size: 24rpx; color: var(--text-sub); flex: none; }
+.row-arrow {
+  width: 14rpx; height: 14rpx;
+  flex: none;
+  margin-left: 14rpx;
+  border-top: 2rpx solid var(--text-3);
+  border-right: 2rpx solid var(--text-3);
+  transform: rotate(45deg);
+}
+
+/* 小尺寸 pill 按钮（替代整宽大黑块） */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 60rpx;
+  padding: 0 28rpx;
+  margin: 0;
+  border-radius: var(--radius-pill);
+  font-size: 24rpx;
+  font-weight: 600;
+  line-height: 60rpx;
+}
+.pill-solid { background: var(--primary); color: var(--on-primary); }
+.pill-ghost { background: var(--card); color: var(--text); border: 1rpx solid var(--border); }
+.pill-done { background: var(--surface); color: var(--text-sub); border: 1rpx solid var(--border); }
+
+/* 三列概览（记录页「本周」/ 我的页「我的数据」共用） */
+.overview-panel { display: flex; padding: 30rpx 0; }
+.ov-item { flex: 1; text-align: center; border-right: 1rpx solid var(--divider); }
+.ov-item:last-child { border-right: none; }
+.ov-label { display: block; font-size: 20rpx; color: var(--text-sub); }
+.ov-value { display: block; font-size: 32rpx; font-weight: 700; margin-top: 12rpx; letter-spacing: -0.5rpx; }
+
+/* 活动列表（首页「最近记录」/ 记录页「全部记录」共用） */
+.activity { display: flex; align-items: center; padding: 22rpx 0; border-bottom: 1rpx solid var(--divider); }
+.activity:last-child { border-bottom: none; }
+.activity-date { width: 110rpx; flex: none; }
+.activity-day { display: block; font-size: 28rpx; font-weight: 700; }
+.activity-week { font-size: 20rpx; color: var(--text-sub); }
+.activity-body { flex: 1; min-width: 0; }
+.activity-time { font-size: 24rpx; color: var(--text-sub); }
+.dots { display: flex; gap: 8rpx; margin-top: 10rpx; }
+.dot { width: 10rpx; height: 10rpx; border-radius: var(--radius-pill); background: var(--border); }
+.dot.on { background: var(--text); }
+.activity-duration { flex: none; font-size: 30rpx; font-weight: 700; letter-spacing: -0.5rpx; }
+
+.empty-panel { display: flex; flex-direction: column; align-items: center; padding: 48rpx 0; }
+.empty-title { font-size: 28rpx; font-weight: 600; }
+.empty-hint { font-size: 22rpx; color: var(--text-sub); margin-top: 12rpx; text-align: center; line-height: 1.6; }
+.empty-link { font-size: 26rpx; font-weight: 600; margin-top: 20rpx; }
+.footer-note { display: block; text-align: center; font-size: 20rpx; color: var(--text-3); margin-top: 52rpx; }
 
 /* 无障碍：尊重系统减弱动效 */
 @media (prefers-reduced-motion: reduce) {

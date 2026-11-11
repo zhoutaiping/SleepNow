@@ -1,39 +1,84 @@
 <view class="page {{themeClass}}">
-  <view class="card profile">
-    <text class="avatar">{{user ? (user.name ? user.name[0] : (user.phone ? user.phone[0] : '?')) : '游'}}</text>
-    <view class="profile-info">
-      <text class="profile-name">{{user ? (user.name || user.phone || '微信用户') : (isGuest ? '访客' : loginText)}}</text>
-      <text class="text-sub" wx:if="{{user}}">已登录</text>
-      <text class="text-sub" wx:elif="{{isGuest}}">未登录 · 数据仅存本机</text>
+  <view class="eyebrow mine-eyebrow">{{t.title}}</view>
+
+  <!-- 身份 Hero：头像与文案上下分层，按钮独立成行，不再挤压换行 -->
+  <view class="hero-panel profile-hero">
+    <view class="profile-top">
+      <view class="avatar num">{{initial}}</view>
+      <view class="profile-info">
+        <text class="profile-name">{{displayName}}</text>
+        <text class="profile-desc">{{statusDesc}}</text>
+      </view>
     </view>
-    <button wx:if="{{!user && !loading}}" class="login" bindtap="onLogin">{{loginText}}</button>
-    <button wx:if="{{user}}" class="logout" bindtap="onLogout">{{logoutText}}</button>
+    <button wx:if="{{!user && !loading}}" class="hero-btn profile-cta" bindtap="onLogin">{{t.login}} ›</button>
+    <button wx:if="{{user}}" class="hero-btn hero-btn-ghost profile-cta" bindtap="onLogout">{{t.logout}}</button>
   </view>
 
-  <view class="card">
-    <text class="card-title">{{langText}}</text>
+  <!-- 成就数据 -->
+  <view class="section"><text class="section-title">{{t.achievement}}</text></view>
+  <view class="panel overview-panel">
+    <view class="ov-item">
+      <text class="ov-label">{{t.totalLogs}}</text>
+      <text class="ov-value num">{{achievement.logs}}<text class="ov-unit">{{t.unitLog}}</text></text>
+    </view>
+    <view class="ov-item">
+      <text class="ov-label">{{t.streak}}</text>
+      <text class="ov-value num">{{achievement.streak}}<text class="ov-unit">{{t.unitDay}}</text></text>
+    </view>
+    <view class="ov-item">
+      <text class="ov-label">{{t.totalHours}}</text>
+      <text class="ov-value num">{{achievement.hours}}<text class="ov-unit">{{t.unitHour}}</text></text>
+    </view>
+  </view>
+
+  <!-- 外观：语言 + 三态主题，收进同一分组 -->
+  <view class="section"><text class="section-title">{{t.appearance}}</text></view>
+  <view class="card setting-card">
+    <text class="group-label">{{t.language}}</text>
     <view class="seg">
       <view class="seg-item {{lang === 'zh-CN' ? 'on' : ''}}" bindtap="switchLang" data-lang="zh-CN"><text>中文</text></view>
       <view class="seg-item {{lang === 'en-US' ? 'on' : ''}}" bindtap="switchLang" data-lang="en-US"><text>English</text></view>
     </view>
-  </view>
-
-  <view class="card">
-    <text class="card-title">{{themeText}}</text>
+    <view class="seg-divider"></view>
+    <text class="group-label">{{t.themeLabel}}</text>
     <view class="seg">
-      <view class="seg-item {{theme === 'auto' ? 'on' : ''}}" bindtap="switchTheme" data-theme="auto"><text>{{themeAuto}}</text></view>
-      <view class="seg-item {{theme === 'light' ? 'on' : ''}}" bindtap="switchTheme" data-theme="light"><text>{{themeLight}}</text></view>
-      <view class="seg-item {{theme === 'dark' ? 'on' : ''}}" bindtap="switchTheme" data-theme="dark"><text>{{themeDark}}</text></view>
+      <view class="seg-item {{theme === 'auto' ? 'on' : ''}}" bindtap="switchTheme" data-theme="auto"><text>{{t.themeAuto}}</text></view>
+      <view class="seg-item {{theme === 'light' ? 'on' : ''}}" bindtap="switchTheme" data-theme="light"><text>{{t.themeLight}}</text></view>
+      <view class="seg-item {{theme === 'dark' ? 'on' : ''}}" bindtap="switchTheme" data-theme="dark"><text>{{t.themeDark}}</text></view>
     </view>
     <view class="theme-state">
-      <text class="theme-state-label">{{themeCurrent}}</text>
+      <text class="theme-state-label">{{t.themeCurrent}}</text>
       <text class="theme-state-value">{{themeState}}</text>
     </view>
-    <text class="theme-desc">{{themeDesc}}</text>
+    <text class="theme-desc">{{t.themeDesc}}</text>
   </view>
 
+  <!-- 更多：分组列表行 -->
+  <view class="section"><text class="section-title">{{t.more}}</text></view>
   <view class="card">
-    <text class="card-title">{{aboutText}}</text>
-    <text class="text-sub">晚安开关 v1.0.0 · WorkBuddy 云服务</text>
+    <view class="row" bindtap="goStats">
+      <view class="row-icon">▥</view>
+      <view class="row-body">
+        <text class="row-title">{{t.statsEntry}}</text>
+        <text class="row-desc">{{t.statsDesc}}</text>
+      </view>
+      <view class="row-arrow"></view>
+    </view>
+    <view class="row" bindtap="goSounds">
+      <view class="row-icon">♫</view>
+      <view class="row-body">
+        <text class="row-title">{{t.soundsEntry}}</text>
+        <text class="row-desc">{{t.soundsDesc}}</text>
+      </view>
+      <view class="row-arrow"></view>
+    </view>
+    <view class="row" bindtap="goAbout">
+      <view class="row-icon">i</view>
+      <view class="row-body"><text class="row-title">{{t.aboutEntry}}</text></view>
+      <text class="row-value">v1.0.0</text>
+      <view class="row-arrow"></view>
+    </view>
   </view>
+
+  <text class="footer-note">{{t.footer}}</text>
 </view>
