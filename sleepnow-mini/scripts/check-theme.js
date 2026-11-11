@@ -86,13 +86,39 @@ const isGray = (v) => {
   const r = [1, 3, 5].map((i) => parseInt(v.slice(i, i + 2), 16));
   return r[0] === r[1] && r[1] === r[2];
 };
-['navigationBarBackgroundColor', 'backgroundColor'].forEach((k) => {
-  if (!isGray(app.window[k])) bad('app.json window.' + k + ' 非灰阶');
+// darkmode:true 必须配 themeLocation + theme.json，且原生控件色值改用 @变量，
+// 否则系统会按默认黑白渲染，与页面 / JS 手动主题三处割裂（BUG B03）
+if (!app.window.darkmode) bad('app.json window.darkmode 未开启');
+if (app.themeLocation !== 'theme.json' || !exists('theme.json')) {
+  bad('app.json 未配置 themeLocation / theme.json 缺失');
+}
+const themeVars = exists('theme.json') ? JSON.parse(read('theme.json')) : { light: {}, dark: {} };
+const COLOR_VARS = ['navBg', 'windowBg', 'tabColor', 'tabSelected', 'tabBg'];
+['light', 'dark'].forEach((mode) => {
+  const vars = themeVars[mode] || {};
+  COLOR_VARS.forEach((k) => { if (!isGray(vars[k])) bad('theme.json ' + mode + '.' + k + ' 非灰阶'); });
+  Object.keys(themeVars.light || {}).forEach((k) => {
+    if (!(k in vars)) bad('theme.json ' + mode + ' 缺变量 ' + k);
+  });
+  ['tabHome', 'tabHomeOn', 'tabSounds', 'tabSoundsOn', 'tabLog', 'tabLogOn',
+    'tabChat', 'tabChatOn', 'tabMine', 'tabMineOn'].forEach((k) => {
+    if (vars[k] && !exists(vars[k])) bad('theme.json ' + mode + '.' + k + ' 指向不存在的图标 ' + vars[k]);
+  });
 });
-['color', 'selectedColor', 'backgroundColor'].forEach((k) => {
-  if (!isGray(app.tabBar[k])) bad('app.json tabBar.' + k + ' 非灰阶');
+const refs = [
+  ...['navigationBarBackgroundColor', 'navigationBarTextStyle', 'backgroundColor', 'backgroundTextStyle']
+    .map((k) => ['window.' + k, app.window[k]]),
+  ...['color', 'selectedColor', 'backgroundColor', 'borderStyle'].map((k) => ['tabBar.' + k, app.tabBar[k]]),
+  ...app.tabBar.list.flatMap((item, i) => [
+    ['tabBar.list[' + i + '].iconPath', item.iconPath],
+    ['tabBar.list[' + i + '].selectedIconPath', item.selectedIconPath],
+  ]),
+];
+refs.forEach(([label, value]) => {
+  if (typeof value !== 'string' || value[0] !== '@') bad('app.json ' + label + ' 未引用 @变量');
+  else if (!(value.slice(1) in (themeVars.light || {}))) bad('app.json ' + label + ' 引用了未定义变量');
 });
-ok('app.json 原生控件（导航栏 / tabBar）配色均为灰阶');
+ok('darkmode + theme.json 变量链路完整，原生控件与图标均为灰阶 / 本地资源');
 
 // ---------------- 主题逻辑（mock wx） ----------------
 console.log('=== 三态切换逻辑 ===');
@@ -130,6 +156,15 @@ theme.unbind(page);
 theme.setTheme('dark');
 check('unbind 后不再通知', pageData.themeClass === 'theme-light');
 check('选择结果已持久化', calls.some((c) => c[0] === 'storage' && c[2] === 'dark'));
+
+// BUG B04 防复发：三个原生 API 各自独立 try，中间抛错不得阻断 tabBar 同步
+const tabBefore = calls.filter((c) => c[0] === 'tab').length;
+const originalSetBg = global.wx.setBackgroundColor;
+global.wx.setBackgroundColor = () => { throw new Error('simulated native failure'); };
+theme.syncNative();
+global.wx.setBackgroundColor = originalSetBg;
+check('中间原生 API 抛错时 tabBar 仍被同步（独立 try）',
+  calls.filter((c) => c[0] === 'tab').length === tabBefore + 1);
 
 console.log(problems ? `\n❌ 共 ${problems} 处问题` : '\n✅ 黑白主题规范自检全部通过');
 process.exit(problems ? 1 : 0);

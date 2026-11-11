@@ -17,6 +17,8 @@ App({
     // 不要在此处写任何 SecretId / SecretKey，密钥只能放云函数环境变量。
   },
   onShow(options) {
+    // 从后台回前台：系统可能重刷了原生控件配色，按用户手动选择再同步一次
+    theme.syncNative();
     // WorkBuddy 小程序账号登录回调：在任意登录守卫/查询之前处理
     this.authReady = (async () => {
       const callback = await cloud.auth.handleWorkBuddyMiniProgramCallback(options);

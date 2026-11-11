@@ -22,6 +22,7 @@ const TEXT_KEYS = {
   recentEmpty: 'home.recentEmpty', goLog: 'home.goLog',
   checkin: 'home.checkin', checked: 'home.checked',
   add: 'log.add', footer: 'settings.footer',
+  loadError: 'home.loadError', retry: 'common.retry',
 };
 
 Page({
@@ -36,6 +37,7 @@ Page({
     // 周打卡
     week: [], streak: 0, checkedToday: false,
     recommend: [], recent: [], isGuest: false,
+    loadError: false,
   },
 
   onLoad() {
@@ -64,29 +66,41 @@ Page({
     return t;
   },
 
+  // BUG B09：网络异常时不能停在旧数据且毫无提示；首页保留内容 + 顶部轻错误条
   async loadDashboard() {
-    await auth.getSessionSafe();
-    const id = auth.getIdentity();
     let logs = [];
     let checkins = [];
-
-    if (id.mode === 'user') {
-      const { data, error } = await cloud.database.from('sleep_logs')
-        .select('id, sleep_date, bed_time, wake_time, quality, duration_min')
-        .order('sleep_date', { ascending: false })
-        .limit(90);
-      // 首页是入口页，云端读取失败时静默降级为空，不让整个首页变成错误态
-      if (!error) logs = data || [];
-      const ck = await cloud.database.from('checkins')
-        .select('checkin_date, streak')
-        .order('checkin_date', { ascending: false })
-        .limit(30);
-      if (!ck.error) checkins = ck.data || [];
-    } else {
-      logs = auth.getGuestSleepLogs();
-      checkins = auth.getGuestCheckins();
+    let failed = false;
+    let isGuest = false;
+    try {
+      await auth.getSessionSafe();
+      const id = auth.getIdentity();
+      isGuest = id.mode === 'guest';
+      if (!isGuest) {
+        const r1 = await cloud.database.from('sleep_logs')
+          .select('id, sleep_date, bed_time, wake_time, quality, duration_min')
+          .order('sleep_date', { ascending: false })
+          .limit(90);
+        if (r1.error) failed = true; else logs = r1.data || [];
+        const r2 = await cloud.database.from('checkins')
+          .select('checkin_date, streak')
+          .order('checkin_date', { ascending: false })
+          .limit(30);
+        if (r2.error) failed = true; else checkins = r2.data || [];
+      } else {
+        logs = auth.getGuestSleepLogs();
+        checkins = auth.getGuestCheckins();
+      }
+    } catch (e) {
+      failed = true;
     }
-    this.render(logs, checkins, id.mode === 'guest');
+    this.render(logs, checkins, isGuest);
+    this.setData({ loadError: failed });
+  },
+
+  reloadDashboard() {
+    this.setData({ loadError: false });
+    this.loadDashboard();
   },
 
   render(logs, checkins, isGuest) {
@@ -123,39 +137,48 @@ Page({
   },
 
   async checkin() {
-    await auth.getSessionSafe();
-    const id = auth.getIdentity();
-    const today = D.dateStr(new Date());
-    if (this.data.checkedToday) {
-      wx.showToast({ title: this.data.t.checked, icon: 'none' });
-      return;
-    }
-    const yest = D.offsetStr(-1);
-    let streak = 1;
-
-    if (id.mode === 'user') {
-      const { data } = await cloud.database.from('checkins')
-        .select('streak').eq('checkin_date', yest).limit(1);
-      if (data && data.length && data[0].streak) streak = data[0].streak + 1;
-      wx.showLoading({ title: i18n.t('common.loading') });
-      const { error } = await cloud.database.from('checkins').insert({
-        checkin_date: today,
-        streak,
-        owner_name: id.user && id.user.name ? id.user.name : null,
-      });
-      wx.hideLoading();
-      if (error) {
-        wx.showToast({ title: i18n.t('home.checkinFail'), icon: 'none' });
+    // BUG B08：快速连点会在首个 await 之前进入两次，导致重复签到
+    if (this._checkingIn) return;
+    this._checkingIn = true;
+    try {
+      await auth.getSessionSafe();
+      const id = auth.getIdentity();
+      const today = D.dateStr(new Date());
+      if (this.data.checkedToday) {
+        wx.showToast({ title: this.data.t.checked, icon: 'none' });
         return;
       }
-    } else {
-      const list = auth.getGuestCheckins();
-      const last = list[list.length - 1];
-      if (last && last.checkin_date === yest) streak = last.streak + 1;
-      auth.addGuestCheckin({ checkin_date: today, streak });
+      const yest = D.offsetStr(-1);
+      let streak = 1;
+
+      if (id.mode === 'user') {
+        const { data } = await cloud.database.from('checkins')
+          .select('streak').eq('checkin_date', yest).limit(1);
+        if (data && data.length && data[0].streak) streak = data[0].streak + 1;
+        wx.showLoading({ title: i18n.t('common.loading') });
+        const { error } = await cloud.database.from('checkins').insert({
+          checkin_date: today,
+          streak,
+          owner_name: id.user && id.user.name ? id.user.name : null,
+        });
+        if (error) {
+          wx.showToast({ title: i18n.t('home.checkinFail'), icon: 'none' });
+          return;
+        }
+      } else {
+        const list = auth.getGuestCheckins();
+        const last = list[list.length - 1];
+        if (last && last.checkin_date === yest) streak = last.streak + 1;
+        auth.addGuestCheckin({ checkin_date: today, streak });
+      }
+      wx.showToast({ title: this.data.t.checked, icon: 'success' });
+      this.loadDashboard(); // 周条 / 连续天数 / 指标一起刷新
+    } catch (e) {
+      wx.showToast({ title: i18n.t('home.checkinFail'), icon: 'none' });
+    } finally {
+      wx.hideLoading();
+      this._checkingIn = false;
     }
-    wx.showToast({ title: this.data.t.checked, icon: 'success' });
-    this.loadDashboard(); // 周条 / 连续天数 / 指标一起刷新
   },
 
   startPlay() {

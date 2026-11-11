@@ -1,4 +1,10 @@
 <view class="page {{themeClass}}">
+  <!-- 云端读取失败：保留本机内容，只给一条可点重试的轻提示（BUG B09） -->
+  <view wx:if="{{loadError}}" class="notice" bindtap="reloadDashboard">
+    <text class="notice-text">{{t.loadError}}</text>
+    <text class="notice-action">{{t.retry}} ›</text>
+  </view>
+
   <!-- 顶部：日期 + 问候 + 连续签到，纯文字层级，不再放大按钮 -->
   <view class="topbar">
     <text class="eyebrow">{{todayLabel}}</text>
@@ -14,7 +20,7 @@
     </view>
     <view class="ring">
       <view class="ring-seg {{item.on ? 'on' : ''}}" wx:for="{{ringSegs}}" wx:key="i"
-            style="transform: rotate({{item.deg}}deg) translateY(-118rpx);"></view>
+            style="transform: rotate({{item.deg}}deg) translateY(-94rpx);"></view>
       <view class="ring-center">
         <text class="ring-value num">{{hasLast ? ringValue : t.noRecord}}</text>
         <text class="ring-caption">{{hasLast ? ringPercent + '% ' + t.achieved : t.noRecordHint}}</text>

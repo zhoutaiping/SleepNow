@@ -37,7 +37,8 @@ page {
   --divider: #e4e4e4;
   --primary: #111111;
   --on-primary: #ffffff;
-  --on-primary-dim: #5a5a5a;   /* 反相 Hero 卡上未点亮的环形段 */
+  --on-primary-dim: #a6a6a6;  /* 反相卡上的次级文字：对 #111 达 7.6:1（WCAG AA） */
+  --on-primary-track: #5a5a5a;/* 环形未点亮段是图形，可用更暗灰阶 */
   --primary-soft: #e8e8e8;
   --scrim: rgba(0, 0, 0, 0.45);
   background: var(--bg);
@@ -58,7 +59,8 @@ page {
   --divider: #2a2a2a;
   --primary: #f2f2f2;
   --on-primary: #0b0b0b;
-  --on-primary-dim: #8a8a8a;   /* 反相 Hero 卡（白底）上未点亮的环形段 */
+  --on-primary-dim: #5a5a5a;  /* 反相卡（白底）上的次级文字：对 #f2f2f2 达 6.2:1 */
+  --on-primary-track: #8a8a8a;/* 环形未点亮段是图形，不与文字共用对比度要求 */
   --primary-soft: #2b2b2b;
   --scrim: rgba(0, 0, 0, 0.68);
   background: var(--bg);
@@ -114,6 +116,21 @@ button::after { border: none; } /* 去掉小程序默认 1px 边框，保持黑�
   line-height: 1.7;
 }
 
+/* 轻错误提示条：云端读取失败时保留页面内容，不打断使用（BUG B09） */
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  padding: 20rpx 24rpx;
+  margin-bottom: 20rpx;
+  background: var(--card);
+  border: 1rpx solid var(--border);
+  border-radius: var(--radius-md);
+}
+.notice-text { font-size: 24rpx; color: var(--text-sub); line-height: 1.5; }
+.notice-action { flex: none; font-size: 24rpx; font-weight: 600; color: var(--text); }
+
 .num {
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.5rpx;
@@ -139,7 +156,8 @@ button::after { border: none; } /* 去掉小程序默认 1px 边框，保持黑�
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin: 44rpx 0 20rpx;
+  /* B14：把「本周打卡 + 周条」拉进首屏，压缩纵向节奏 */
+  margin: 32rpx 0 16rpx;
 }
 .section-title {
   font-size: 30rpx;
@@ -155,7 +173,7 @@ button::after { border: none; } /* 去掉小程序默认 1px 边框，保持黑�
   background: var(--card);
   border: 1rpx solid var(--border);
   border-radius: var(--radius-lg);
-  padding: 32rpx;
+  padding: 26rpx;
   box-sizing: border-box;
 }
 
@@ -164,7 +182,7 @@ button::after { border: none; } /* 去掉小程序默认 1px 边框，保持黑�
   background: var(--primary);
   color: var(--on-primary);
   border-radius: var(--radius-lg);
-  padding: 36rpx;
+  padding: 28rpx;
   box-sizing: border-box;
 }
 .hero-panel .eyebrow { color: var(--on-primary-dim); }
@@ -177,8 +195,8 @@ button::after { border: none; } /* 去掉小程序默认 1px 边框，保持黑�
   font-size: 28rpx;
   font-weight: 700;
   letter-spacing: 1rpx;
-  line-height: 92rpx;
-  height: 92rpx;
+  line-height: 80rpx;
+  height: 80rpx;
   margin: 0;
   border-radius: var(--radius-md);
 }
@@ -191,7 +209,7 @@ button::after { border: none; } /* 去掉小程序默认 1px 边框，保持黑�
   background: var(--card);
   border: 1rpx solid var(--border);
   border-radius: var(--radius-md);
-  padding: 26rpx;
+  padding: 20rpx;
 }
 .metric-label { font-size: 22rpx; color: var(--text-sub); }
 .metric-value {
@@ -272,7 +290,7 @@ button::after { border: none; } /* 去掉小程序默认 1px 边框，保持黑�
 .overview-panel { display: flex; padding: 30rpx 0; }
 .ov-item { flex: 1; text-align: center; border-right: 1rpx solid var(--divider); }
 .ov-item:last-child { border-right: none; }
-.ov-label { display: block; font-size: 20rpx; color: var(--text-sub); }
+.ov-label { display: block; font-size: 22rpx; color: var(--text-sub); }
 .ov-value { display: block; font-size: 32rpx; font-weight: 700; margin-top: 12rpx; letter-spacing: -0.5rpx; }
 
 /* 活动列表（首页「最近记录」/ 记录页「全部记录」共用） */
@@ -280,7 +298,7 @@ button::after { border: none; } /* 去掉小程序默认 1px 边框，保持黑�
 .activity:last-child { border-bottom: none; }
 .activity-date { width: 110rpx; flex: none; }
 .activity-day { display: block; font-size: 28rpx; font-weight: 700; }
-.activity-week { font-size: 20rpx; color: var(--text-sub); }
+.activity-week { font-size: 22rpx; color: var(--text-sub); }
 .activity-body { flex: 1; min-width: 0; }
 .activity-time { font-size: 24rpx; color: var(--text-sub); }
 .dots { display: flex; gap: 8rpx; margin-top: 10rpx; }
@@ -292,7 +310,7 @@ button::after { border: none; } /* 去掉小程序默认 1px 边框，保持黑�
 .empty-title { font-size: 28rpx; font-weight: 600; }
 .empty-hint { font-size: 22rpx; color: var(--text-sub); margin-top: 12rpx; text-align: center; line-height: 1.6; }
 .empty-link { font-size: 26rpx; font-weight: 600; margin-top: 20rpx; }
-.footer-note { display: block; text-align: center; font-size: 20rpx; color: var(--text-3); margin-top: 52rpx; }
+.footer-note { display: block; text-align: center; font-size: 22rpx; color: var(--text-3); margin-top: 52rpx; }
 
 /* 无障碍：尊重系统减弱动效 */
 @media (prefers-reduced-motion: reduce) {

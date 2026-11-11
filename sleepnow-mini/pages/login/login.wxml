@@ -1,27 +1,27 @@
 <view class="page {{themeClass}}">
   <view class="hero">
-    <text class="title">{{title}}</text>
-    <text class="sub">登录后数据多设备同步、长期保留</text>
+    <text class="title">{{t.title}}</text>
+    <text class="sub">{{t.sub}}</text>
   </view>
 
-  <button class="primary" loading="{{logging}}" bindtap="onWechat">{{wechatText}}</button>
+  <button class="primary" loading="{{logging}}" bindtap="onWechat">{{t.wechat}}</button>
 
-  <view class="divider"><text>或</text></view>
+  <view class="divider"><text>{{t.or}}</text></view>
 
   <view class="phone-box">
     <view class="phone-input">
       <text class="prefix">+86</text>
-      <input class="input" type="number" placeholder="请输入手机号" value="{{phone}}" bindinput="onPhoneInput" maxlength="11" />
+      <input class="input" type="number" placeholder="{{t.phonePlaceholder}}" value="{{phone}}" bindinput="onPhoneInput" maxlength="11" />
     </view>
     <text wx:if="{{phoneError}}" class="err">{{phoneError}}</text>
     <view class="code-row">
-      <input class="code-input" placeholder="验证码" value="{{code}}" bindinput="onCodeInput" maxlength="6" />
+      <input class="code-input" placeholder="{{t.codePlaceholder}}" value="{{code}}" bindinput="onCodeInput" maxlength="6" />
       <button class="code-btn" disabled="{{sending || countdown > 0}}" bindtap="onSendCode">
-        {{countdown > 0 ? countdown + 's' : '获取验证码'}}
+        {{countdown > 0 ? countdown + 's' : t.sendCode}}
       </button>
     </view>
-    <button class="primary" loading="{{logging}}" bindtap="onPhoneLogin" disabled="{{!codeSent}}">{{phoneText}}</button>
+    <button class="primary" loading="{{logging}}" bindtap="onPhoneLogin" disabled="{{!codeSent || logging}}">{{t.phone}}</button>
   </view>
 
-  <button class="guest" bindtap="onGuest">{{guestText}}</button>
+  <button class="guest" bindtap="onGuest">{{t.guest}}</button>
 </view>

@@ -26,7 +26,7 @@
 }
 
 /* 成就数据 */
-.ov-unit { font-size: 20rpx; font-weight: 500; color: var(--text-sub); margin-left: 4rpx; letter-spacing: 0; }
+.ov-unit { font-size: 22rpx; font-weight: 500; color: var(--text-sub); margin-left: 4rpx; letter-spacing: 0; }
 
 /* 外观分组 */
 .setting-card { padding: 32rpx; }

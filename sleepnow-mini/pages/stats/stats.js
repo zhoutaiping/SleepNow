@@ -1,33 +1,17 @@
 // 睡眠统计页：按近 7 / 30 天聚合 sleep_logs 与 checkins
 // 身份分流与 sleep-log / home 保持一致：登录用户读云端，访客读本地
+// ---------------------------------------------------------------------------
+// BUG B06：统计口径统一到 utils/dashboard.js 的 summarize()，
+// 本页只保留柱状图所需的「按日均值」计算，避免与首页/记录页数值打架。
+// ---------------------------------------------------------------------------
 const { cloud } = require('../../utils/cloud');
 const i18n = require('../../core/i18n');
 const auth = require('../../core/auth');
 const theme = require('../../core/theme');
+const D = require('../../utils/dashboard');
 
 const MAX_BAR_RPX = 220;        // 柱状图最高柱子（rpx）
 const MAX_SCALE_MIN = 12 * 60;  // 刻度下限 12 小时，避免单条记录把柱子撑满
-
-function pad(n) { return n < 10 ? '0' + n : '' + n; }
-function dateStr(d) {
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-}
-function lastNDays(n) {
-  const list = [];
-  for (let i = n - 1; i >= 0; i--) {
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    list.push(dateStr(d));
-  }
-  return list;
-}
-function formatDuration(mins) {
-  if (!mins || mins <= 0) return '--';
-  const h = Math.floor(mins / 60);
-  const m = Math.round(mins % 60);
-  if (i18n.getLang() === 'en-US') return `${h}h ${m}m`;
-  return `${h}${i18n.t('stats.hours')}${m}${i18n.t('stats.minutes')}`;
-}
 
 Page({
   data: {
@@ -113,33 +97,28 @@ Page({
 
   render(logs, checkins, isGuest) {
     const range = this.data.range;
-    const days = lastNDays(range);
+    const days = D.lastNDays(range);
+    const s = D.summarize(logs, checkins, days);
+
+    // 柱状图：同一日期多条取均值（与 summarize 的口径一致）
     const daySet = {};
     days.forEach((d) => { daySet[d] = { sum: 0, count: 0 }; });
-
-    let durationSum = 0;
-    let durationCount = 0;
-    let qualitySum = 0;
-    let qualityCount = 0;
-
     (logs || []).forEach((r) => {
       const d = String(r.sleep_date || '').slice(0, 10);
-      if (!daySet[d]) return; // 只统计当前区间内的日期
-      const dur = Number(r.duration_min) || 0;
-      const q = Number(r.quality) || 0;
+      if (!daySet[d]) return;
       daySet[d].count += 1;
-      daySet[d].sum += dur;
-      if (dur > 0) { durationSum += dur; durationCount += 1; }
-      if (q > 0) { qualitySum += q; qualityCount += 1; }
+      daySet[d].sum += Number(r.duration_min) || 0;
     });
 
-    const valid = days.filter((d) => daySet[d].count > 0);
     let maxMinutes = MAX_SCALE_MIN;
-    valid.forEach((d) => {
-      const m = Math.round(daySet[d].sum / daySet[d].count);
+    days.forEach((d) => {
+      const item = daySet[d];
+      if (!item.count) return;
+      const m = Math.round(item.sum / item.count);
       if (m > maxMinutes) maxMinutes = m;
     });
 
+    const lang = i18n.getLang();
     const bars = days.map((d, i) => {
       const item = daySet[d];
       const mins = item.count ? Math.round(item.sum / item.count) : 0;
@@ -148,7 +127,8 @@ Page({
         : 4;
       return {
         date: d,
-        label: (range === 7 || i % 5 === 0 || i === days.length - 1)
+        // 字号提升到 22rpx 后，30 天视图需要更稀疏的标签避免重叠
+        label: (range === 7 || i % 7 === 0 || i === days.length - 1)
           ? d.slice(5).replace('-', '/')
           : '',
         minutes: mins,
@@ -157,25 +137,16 @@ Page({
       };
     });
 
-    let streak = 0;
-    if (checkins && checkins.length) {
-      let latest = checkins[0];
-      checkins.forEach((c) => {
-        if (String(c.checkin_date) > String(latest.checkin_date)) latest = c;
-      });
-      streak = Number(latest.streak) || 0;
-    }
-
     this.setData({
-      status: valid.length ? 'ready' : 'empty',
+      status: s.recordDays ? 'ready' : 'empty',
       isGuest,
-      avgDuration: durationCount ? formatDuration(Math.round(durationSum / durationCount)) : '--',
-      avgQuality: qualityCount ? (qualitySum / qualityCount).toFixed(1) : '--',
-      recordDays: valid.length,
-      coverage: Math.round((valid.length / range) * 100),
-      streak,
+      avgDuration: s.avgDuration ? D.formatDuration(s.avgDuration, lang) : '--',
+      avgQuality: s.avgQuality,
+      recordDays: s.recordDays,
+      coverage: s.coverage,
+      streak: s.streak,
       bars,
-      maxLabel: formatDuration(maxMinutes),
+      maxLabel: D.formatDuration(maxMinutes, lang),
     });
   },
 

@@ -23,7 +23,7 @@ Page({
   play(e) {
     const ds = e.currentTarget.dataset;
     if (!ds.src) {
-      wx.showToast({ title: '示例音频待接入', icon: 'none' });
+      wx.showToast({ title: i18n.t('sounds.noAudio'), icon: 'none' });
       return;
     }
     player.play(ds.src, ds.name);

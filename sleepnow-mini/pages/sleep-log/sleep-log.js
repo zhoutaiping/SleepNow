@@ -6,6 +6,8 @@ const auth = require('../../core/auth');
 const theme = require('../../core/theme');
 const D = require('../../utils/dashboard');
 
+const MAX_SLEEP_MINUTES = 16 * 60; // 生理合理上限；超过视为输入错误（BUG B07）
+
 const TEXT_KEYS = {
   title: 'log.title', subtitle: 'log.subtitle', week: 'log.week',
   avg: 'log.avg', days: 'log.days', coverage: 'log.coverage',
@@ -14,7 +16,7 @@ const TEXT_KEYS = {
   empty: 'log.empty', firstTitle: 'log.firstTitle', firstHint: 'log.firstHint',
   goLog: 'home.goLog', viewAll: 'home.viewAll', guestHint: 'stats.guestHint',
   date: 'log.date', bedtime: 'log.bedtime', wake: 'log.wake',
-  rating: 'log.rating', note: 'log.note', save: 'log.save', cancel: 'log.cancel',
+  rating: 'log.rating', note: 'log.note', save: 'log.save', saving: 'log.saving', cancel: 'log.cancel',
   loading: 'common.loading', retry: 'common.retry',
 };
 
@@ -24,8 +26,11 @@ function calcDuration(bed, wake) {
   if (!bed || !wake) return null;
   const [bh, bm] = bed.split(':').map(Number);
   const [wh, wm] = wake.split(':').map(Number);
+  if (![bh, bm, wh, wm].every(Number.isFinite)) return null;
   let mins = wh * 60 + wm - (bh * 60 + bm);
   if (mins <= 0) mins += 24 * 60; // 跨午夜顺延到次日
+  // bed==wake 会得到 1440 分钟（24h），旧实现会让 Hero 显示 300% 达成
+  if (mins <= 0 || mins > MAX_SLEEP_MINUTES) return null;
   return mins;
 }
 
@@ -35,11 +40,13 @@ Page({
     status: 'loading', logs: [], total: 0, errorMsg: '', isGuest: false,
     week: [], overview: { avg: '--', days: '0/7', coverage: '0%' },
     formVisible: false,
+    saving: false,
     sleepDate: todayStr(), bedTime: '', wakeTime: '', quality: 3, note: '',
   },
 
   onLoad() {
     theme.bind(this);
+    this._dates = {}; // 已记录日期集合，供保存时做同日去重（BUG B08）
   },
   onUnload() {
     theme.unbind(this);
@@ -82,6 +89,11 @@ Page({
     const lang = i18n.getLang();
     const days = D.lastNDays(7);
     const s = D.summarize(raw, [], days);
+    this._dates = {};
+    (raw || []).forEach((r) => {
+      const d = String(r.sleep_date || '').slice(0, 10);
+      if (d) this._dates[d] = true;
+    });
     this.setData({
       status: raw.length ? 'ready' : 'empty',
       logs: D.recentLogs(raw, 30, lang),
@@ -111,9 +123,20 @@ Page({
   onNote(e) { this.setData({ note: e.detail.value }); },
 
   async save() {
+    // BUG B08：连点两次保存会写入同日两条；期间一律锁定按钮
+    if (this.data.saving) return;
     const { sleepDate, bedTime, wakeTime, quality, note } = this.data;
     if (!sleepDate || !bedTime || !wakeTime) {
       wx.showToast({ title: i18n.t('log.required'), icon: 'none' });
+      return;
+    }
+    const durationMin = calcDuration(bedTime, wakeTime);
+    if (!durationMin) {
+      wx.showToast({ title: i18n.t('log.durationInvalid'), icon: 'none' });
+      return;
+    }
+    if (this._dates && this._dates[sleepDate]) {
+      wx.showToast({ title: i18n.t('log.duplicate'), icon: 'none' });
       return;
     }
     const record = {
@@ -121,27 +144,33 @@ Page({
       bed_time: bedTime,
       wake_time: wakeTime,
       quality,
-      duration_min: calcDuration(bedTime, wakeTime),
+      duration_min: durationMin,
       note: note || null,
     };
     const id = auth.getIdentity();
+    this.setData({ saving: true });
     wx.showLoading({ title: i18n.t('common.loading') });
-    if (id.mode === 'user') {
-      const { error } = await cloud.database.from('sleep_logs').insert({
-        ...record,
-        source: 'manual',
-        owner_name: id.user && id.user.name ? id.user.name : null,
-      });
-      wx.hideLoading();
-      if (error) {
-        wx.showToast({ title: i18n.t('log.saveFail'), icon: 'none' });
-        return;
+    try {
+      if (id.mode === 'user') {
+        const { error } = await cloud.database.from('sleep_logs').insert({
+          ...record,
+          source: 'manual',
+          owner_name: id.user && id.user.name ? id.user.name : null,
+        });
+        if (error) {
+          wx.showToast({ title: i18n.t('log.saveFail'), icon: 'none' });
+          return;
+        }
+      } else {
+        auth.addGuestSleepLog(record);
       }
-    } else {
-      auth.addGuestSleepLog(record);
+      this.setData({ formVisible: false, bedTime: '', wakeTime: '', quality: 3, note: '' });
+      this.loadLogs();
+    } catch (e) {
+      wx.showToast({ title: i18n.t('log.saveFail'), icon: 'none' });
+    } finally {
       wx.hideLoading();
+      this.setData({ saving: false });
     }
-    this.setData({ formVisible: false, bedTime: '', wakeTime: '', quality: 3, note: '' });
-    this.loadLogs();
   },
 });

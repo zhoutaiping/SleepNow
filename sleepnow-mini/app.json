@@ -11,25 +11,51 @@
   ],
   "window": {
     "navigationBarTitleText": "晚安开关",
-    "navigationBarBackgroundColor": "#ffffff",
-    "navigationBarTextStyle": "black",
-    "backgroundColor": "#f4f4f4",
-    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "@navBg",
+    "navigationBarTextStyle": "@navFront",
+    "backgroundColor": "@windowBg",
+    "backgroundTextStyle": "@windowTextStyle",
     "darkmode": true
   },
   "tabBar": {
-    "color": "#8a8a8a",
-    "selectedColor": "#111111",
-    "backgroundColor": "#ffffff",
-    "borderStyle": "white",
+    "color": "@tabColor",
+    "selectedColor": "@tabSelected",
+    "backgroundColor": "@tabBg",
+    "borderStyle": "@tabBorder",
     "list": [
-      { "pagePath": "pages/home/home", "text": "首页" },
-      { "pagePath": "pages/sounds/sounds", "text": "音频" },
-      { "pagePath": "pages/sleep-log/sleep-log", "text": "记录" },
-      { "pagePath": "pages/chat/chat", "text": "陪伴" },
-      { "pagePath": "pages/settings/settings", "text": "我的" }
+      {
+        "pagePath": "pages/home/home",
+        "text": "首页",
+        "iconPath": "@tabHome",
+        "selectedIconPath": "@tabHomeOn"
+      },
+      {
+        "pagePath": "pages/sounds/sounds",
+        "text": "音频",
+        "iconPath": "@tabSounds",
+        "selectedIconPath": "@tabSoundsOn"
+      },
+      {
+        "pagePath": "pages/sleep-log/sleep-log",
+        "text": "记录",
+        "iconPath": "@tabLog",
+        "selectedIconPath": "@tabLogOn"
+      },
+      {
+        "pagePath": "pages/chat/chat",
+        "text": "陪伴",
+        "iconPath": "@tabChat",
+        "selectedIconPath": "@tabChatOn"
+      },
+      {
+        "pagePath": "pages/settings/settings",
+        "text": "我的",
+        "iconPath": "@tabMine",
+        "selectedIconPath": "@tabMineOn"
+      }
     ]
   },
+  "themeLocation": "theme.json",
   "requiredBackgroundModes": ["audio"],
   "style": "v2",
   "sitemapLocation": "sitemap.json",

@@ -196,3 +196,52 @@ function buildTexts() {
 `scripts/check-chat.js` 已加静态断言：不得再出现 `<textarea>` / `auto-height`，
 三元素必须同为 88rpx，且 `confirm-type="send"` 与 `focus` 绑定存在。
 语音能力的主体差异与三条接入路径见《晚安开关小程序-AI接入实操方案.md》第 10 节。
+
+## 10. 质量基线与渲染引擎决策（v1.4 · 18 项 bug 修复）
+
+### 10.1 维持 WebView，暂不启用 Skyline（B17 结论）
+
+官方《Skyline WXSS 样式支持与差异》明确 **Inline / Inline-Block 布局不支持**（仅 text 组件内嵌结构可用），
+CSS 变量要到 Android 8.0.35 / iOS 8.0.38 才支持，且 Skyline 下所有节点默认 `position: relative`。
+本工程恰好重度依赖这些特性：
+
+| 现有实现 | Skyline 下的风险 |
+|----------|------------------|
+| 首页 `.sound-card` 用 `display:inline-block` + `white-space:nowrap` 横排 | 横排卡片塌成竖排，助眠推荐区错乱 |
+| 深浅主题全靠 `.theme-light/.theme-dark` 上的 CSS 变量 | 低版本客户端变量失效，整页配色崩坏 |
+| Hero 24 段环形用 `position:absolute` + `transform` | 定位基准变化，环形错位 |
+| `scroll-view scroll-x`、30 天柱状图 | 需按 Skyline 滚动/长列表约束重写 |
+
+**决策：本轮不写 `renderer: "skyline"`，8 页保持 WebView。** 在真机验证前全量开启属于「用确定性回归换不确定的性能收益」。
+开启前必须逐项通过：① 把横向卡片改成 `flex` + `scroll-view` 横向布局；② 真机核对 CSS 变量与主题三处一致性；
+③ Hero 环形、柱状图、录音态输入栏逐页比对；④ 基础库/客户端版本下限与降级策略；⑤ 后台音频与 tabBar 图标不受影响。
+按页灰度，禁止一次性全开。
+
+### 10.2 三条工程红线
+
+1. **后台音频**：只能用 `wx.getBackgroundAudioManager()`（全局单例，绑定事件一次），
+   必须写 `title / singer / coverImgUrl`；定时关闭用 `timerEndAt` 绝对时间 + `onTimeUpdate` 兜底，
+   禁止只靠 `setTimeout`（切后台会被挂起）。`scripts/check-pages.js` 有静态防复发断言。
+2. **主题**：`darkmode: true` 时必须配 `themeLocation` + `theme.json`，原生控件色值全部 `@变量`；
+   JS 侧三个 `wx.*` API 各自独立 `try`；选中态图标按「实际生效 mode」用 `setTabBarItem` 覆盖
+   （`theme.json` 只跟随系统主题，不跟随用户手动选择）。
+3. **数据**：访客数据只有全部成功写入云端后才删本地副本，靠云端日期查重实现幂等重试；
+   `sleep_logs` 必须有 `UNIQUE (owner_id, sleep_date)`，前端保存/签到加连点锁。
+
+### 10.3 无障碍与错误态基线
+
+- 全局最小字号 **22rpx**（20rpx 在 2x 屏仅 10px）；`scripts/check-pages.js` 会拦截更小的字号。
+- 反相 Hero 卡上的次级文字用 `--on-primary-dim`（浅色 7.6:1 / 深色 6.2:1，均达 WCAG AA）；
+  环形未点亮段是图形，单独用 `--on-primary-track`，不与文字共用对比度约束。
+- 所有页面请求都要有可见失败反馈：首页 / 我的页用 `.notice` 轻提示条 + 点按重试，
+  记录页 / 统计页用整块 error 态；静默降级为旧数据视为缺陷。
+
+### 10.4 回归脚本矩阵
+
+| 脚本 | 覆盖 |
+|------|------|
+| `scripts/check-theme.js` | i18n 对齐、token、darkmode 变量链路、三态切换、原生 API 独立 try |
+| `scripts/check-dashboard.js` | 日期 / 环形 / 聚合纯函数与三页 render |
+| `scripts/check-chat.js` | AI 流式链路、内容安全、语音状态机、严格单行输入 |
+| `scripts/check-pages.js` | **新增**：8 页事件绑定 / 文案注入 / 国际化 / 字号 / 音频与 schema 防复发 |
+| `scripts/check-regressions.js` | **新增**：锁屏音频、访客合并、登录异常、非法时长、连点、网络错误态 |

@@ -9,6 +9,10 @@ node_modules/
 miniprogram_npm/
 *.log
 
+# Python 资源生成器缓存
+__pycache__/
+*.pyc
+
 # macOS / 编辑器
 .DS_Store
 .idea/

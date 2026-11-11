@@ -4,18 +4,18 @@
   </view>
 
   <view class="controls">
-    <button bindtap="toggle">{{playing ? '暂停' : '播放'}}</button>
-    <button bindtap="stop">{{stopText}}</button>
+    <button bindtap="toggle">{{playing ? t.pause : t.play}}</button>
+    <button bindtap="stop">{{t.stop}}</button>
   </view>
 
   <view class="timer-box">
-    <text class="card-title">{{timerTitle}}</text>
+    <text class="card-title">{{t.timerTitle}}</text>
     <view class="timer-row">
       <view class="timer-chip {{activeMin === item ? 'on' : ''}}" wx:for="{{timers}}" wx:key="*this" bindtap="setTimer" data-min="{{item}}">
-        <text>{{item}} 分</text>
+        <text>{{item}} {{t.unitMin}}</text>
       </view>
       <view class="timer-chip {{activeMin === 0 ? 'on' : ''}}" bindtap="setTimer" data-min="0">
-        <text>关闭</text>
+        <text>{{t.off}}</text>
       </view>
     </view>
   </view>

@@ -1,0 +1,42 @@
+{
+  "light": {
+    "navBg": "#ffffff",
+    "navFront": "black",
+    "windowBg": "#f4f4f4",
+    "windowTextStyle": "light",
+    "tabColor": "#8a8a8a",
+    "tabSelected": "#111111",
+    "tabBg": "#ffffff",
+    "tabBorder": "white",
+    "tabHome": "assets/tab/home.png",
+    "tabHomeOn": "assets/tab/home-on.png",
+    "tabSounds": "assets/tab/sounds.png",
+    "tabSoundsOn": "assets/tab/sounds-on.png",
+    "tabLog": "assets/tab/log.png",
+    "tabLogOn": "assets/tab/log-on.png",
+    "tabChat": "assets/tab/chat.png",
+    "tabChatOn": "assets/tab/chat-on.png",
+    "tabMine": "assets/tab/mine.png",
+    "tabMineOn": "assets/tab/mine-on.png"
+  },
+  "dark": {
+    "navBg": "#141414",
+    "navFront": "white",
+    "windowBg": "#0b0b0b",
+    "windowTextStyle": "dark",
+    "tabColor": "#8a8a8a",
+    "tabSelected": "#f2f2f2",
+    "tabBg": "#141414",
+    "tabBorder": "black",
+    "tabHome": "assets/tab/home.png",
+    "tabHomeOn": "assets/tab/home-on-dark.png",
+    "tabSounds": "assets/tab/sounds.png",
+    "tabSoundsOn": "assets/tab/sounds-on-dark.png",
+    "tabLog": "assets/tab/log.png",
+    "tabLogOn": "assets/tab/log-on-dark.png",
+    "tabChat": "assets/tab/chat.png",
+    "tabChatOn": "assets/tab/chat-on-dark.png",
+    "tabMine": "assets/tab/mine.png",
+    "tabMineOn": "assets/tab/mine-on-dark.png"
+  }
+}

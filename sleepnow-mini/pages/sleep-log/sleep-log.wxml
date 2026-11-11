@@ -107,8 +107,8 @@
       </view>
       <textarea class="note-field" placeholder="{{t.note}}" value="{{note}}" bindinput="onNote" />
       <view class="modal-actions">
-        <button bindtap="closeForm">{{t.cancel}}</button>
-        <button bindtap="save">{{t.save}}</button>
+        <button bindtap="closeForm" disabled="{{saving}}">{{t.cancel}}</button>
+        <button bindtap="save" disabled="{{saving}}">{{saving ? t.saving : t.save}}</button>
       </view>
     </view>
   </view>

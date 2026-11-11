@@ -1,4 +1,10 @@
 <view class="page {{themeClass}}">
+  <!-- 云端概览读取失败：轻提示 + 重试（BUG B09） -->
+  <view wx:if="{{dataError}}" class="notice" bindtap="reloadOverview">
+    <text class="notice-text">{{t.loadError}}</text>
+    <text class="notice-action">{{t.retry}} ›</text>
+  </view>
+
   <view class="eyebrow mine-eyebrow">{{t.title}}</view>
 
   <!-- 身份 Hero：头像与文案上下分层，按钮独立成行，不再挤压换行 -->

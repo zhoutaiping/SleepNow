@@ -19,6 +19,7 @@ const TEXT_KEYS = {
   themeAuto: 'theme.auto', themeLight: 'theme.light', themeDark: 'theme.dark',
   themeCurrent: 'theme.current', themeDesc: 'theme.desc',
   unitLog: 'settings.unitLog', unitHour: 'home.unitHour', unitDay: 'settings.unitDay',
+  loadError: 'settings.loadError', retry: 'common.retry',
 };
 
 // auto 模式下展示「实际生效的 mode · 跟随系统」，让切换控件明确传达自身状态
@@ -42,6 +43,7 @@ Page({
     displayName: '',
     statusDesc: '',
     achievement: { logs: 0, streak: 0, hours: 0 },
+    dataError: false,
   },
 
   onLoad() {
@@ -54,7 +56,13 @@ Page({
   async onShow() {
     this.buildTexts();
     this.setData({ loading: true });
-    await auth.getSessionSafe();
+    try {
+      await auth.getSessionSafe();
+    } catch (e) {
+      // BUG B09：登录态查询失败也要给出可见反馈，不能停在旧数据
+      this.setData({ loading: false, dataError: true });
+      return;
+    }
     const id = auth.getIdentity();
     const u = id.user;
     const name = u ? (u.name || u.phone || i18n.t('settings.wechatUser')) : i18n.t('settings.guest');
@@ -83,25 +91,36 @@ Page({
   async loadOverview(id) {
     let logs = [];
     let checkins = [];
-    if (id.mode === 'user') {
-      const { data, error } = await cloud.database.from('sleep_logs')
-        .select('sleep_date, quality, duration_min')
-        .order('sleep_date', { ascending: false })
-        .limit(90);
-      if (!error) logs = data || [];
-      const ck = await cloud.database.from('checkins')
-        .select('checkin_date, streak')
-        .order('checkin_date', { ascending: false })
-        .limit(30);
-      if (!ck.error) checkins = ck.data || [];
-    } else {
-      logs = auth.getGuestSleepLogs();
-      checkins = auth.getGuestCheckins();
+    let failed = false;
+    try {
+      if (id.mode === 'user') {
+        const r1 = await cloud.database.from('sleep_logs')
+          .select('sleep_date, quality, duration_min')
+          .order('sleep_date', { ascending: false })
+          .limit(90);
+        if (r1.error) failed = true; else logs = r1.data || [];
+        const r2 = await cloud.database.from('checkins')
+          .select('checkin_date, streak')
+          .order('checkin_date', { ascending: false })
+          .limit(30);
+        if (r2.error) failed = true; else checkins = r2.data || [];
+      } else {
+        logs = auth.getGuestSleepLogs();
+        checkins = auth.getGuestCheckins();
+      }
+    } catch (e) {
+      failed = true;
     }
     const s = D.summarize(logs, checkins, D.lastNDays(30));
     this.setData({
       achievement: { logs: s.totalLogs, streak: s.streak, hours: s.totalHours },
+      dataError: failed,
     });
+  },
+
+  reloadOverview() {
+    this.setData({ dataError: false });
+    this.loadOverview(auth.getIdentity());
   },
 
   switchLang(e) {
@@ -151,7 +170,7 @@ Page({
   goAbout() {
     wx.showModal({
       title: i18n.t('settings.aboutEntry'),
-      content: 'v1.0.0 · WorkBuddy 云服务',
+      content: i18n.t('settings.aboutContent'),
       showCancel: false,
     });
   },

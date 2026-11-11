@@ -21,7 +21,7 @@
 .quick-panel { padding: 8rpx 32rpx; }
 .state { padding: 48rpx 0; }
 .state-btn { margin-top: 20rpx; background: var(--primary); color: var(--on-primary); }
-.guest-hint { display: block; font-size: 20rpx; color: var(--text-3); text-align: center; margin-top: 32rpx; }
+.guest-hint { display: block; font-size: 22rpx; color: var(--text-3); text-align: center; margin-top: 32rpx; }
 
 /* 记录表单 */
 .modal {

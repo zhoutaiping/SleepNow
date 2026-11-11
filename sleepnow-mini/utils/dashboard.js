@@ -130,8 +130,12 @@ function summarize(logs, checkins, days) {
     recordDays += 1;
     durationSum += it.sum / it.count;
     durationCount += 1;
-    qualitySum += it.quality / (it.qCount || 1);
-    qualityCount += 1;
+    // BUG B06：无评分记录（quality=0/NULL）不能当 0 分参与平均，
+    // 否则「一天未评分 + 一天 5 分」会被算成 2.5。与 stats 页口径统一。
+    if (it.qCount > 0) {
+      qualitySum += it.quality / it.qCount;
+      qualityCount += 1;
+    }
   });
 
   let streak = 0;
@@ -182,7 +186,8 @@ function recentLogs(logs, n, lang) {
 
 function goalPercent(mins, goal) {
   const g = goal || GOAL_MINUTES;
-  return Math.round((Math.max(0, Number(mins) || 0) / g) * 100);
+  // BUG B07：异常时长（如 bed==wake 被算成 24h）不得让 Hero 显示 300% 达成
+  return Math.max(0, Math.min(100, Math.round((Number(mins) || 0) / g * 100)));
 }
 
 module.exports = {

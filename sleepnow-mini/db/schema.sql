@@ -14,7 +14,9 @@ CREATE TABLE sleep_logs (
   quality      INTEGER     DEFAULT 3,
   source       TEXT        DEFAULT 'manual',
   note         TEXT,
-  created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  -- BUG B08：同一用户同一天只允许一条记录，防止重复提交产生两条
+  UNIQUE (owner_id, sleep_date)
 );
 COMMENT ON TABLE sleep_logs IS '用户睡眠记录（私有，仅本人可读写）';
 ALTER TABLE sleep_logs ENABLE ROW LEVEL SECURITY;
@@ -34,6 +36,13 @@ CREATE TABLE checkins (
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE (owner_id, checkin_date)
 );
+-- ===== 增量迁移（线上已建表时逐条执行，每条 exec_sql 仅含单语句） =====
+-- 1) 先清理历史重复行（保留 id 最小的一条），否则加唯一约束会失败
+DELETE FROM sleep_logs a USING sleep_logs b
+  WHERE a.id > b.id AND a.owner_id = b.owner_id AND a.sleep_date = b.sleep_date;
+-- 2) 补唯一约束
+ALTER TABLE sleep_logs ADD CONSTRAINT sleep_logs_owner_date_key UNIQUE (owner_id, sleep_date);
+
 COMMENT ON TABLE checkins IS '用户签到打卡记录（私有，仅本人可读写）';
 ALTER TABLE checkins ENABLE ROW LEVEL SECURITY;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.checkins TO authenticated, anon;
