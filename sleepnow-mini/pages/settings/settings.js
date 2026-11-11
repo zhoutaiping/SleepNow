@@ -19,6 +19,8 @@ const TEXT_KEYS = {
   themeAuto: 'theme.auto', themeLight: 'theme.light', themeDark: 'theme.dark',
   themeCurrent: 'theme.current', themeDesc: 'theme.desc',
   unitLog: 'settings.unitLog', unitHour: 'home.unitHour', unitDay: 'settings.unitDay',
+  benefitsTitle: 'settings.benefitsTitle', benefit1: 'settings.benefit1',
+  benefit2: 'settings.benefit2', benefit3: 'settings.benefit3',
   loadError: 'settings.loadError', retry: 'common.retry',
 };
 

@@ -57,11 +57,33 @@
     </view>
   </view>
 
+  <!-- 近 7 天睡眠时长：健身 App 的「每周训练时长」柱状图，空数据显灰底占位不造假 -->
+  <view class="section">
+    <text class="section-title">{{t.trend}}</text>
+    <text class="section-more" bindtap="goStats">{{t.viewAll}} ›</text>
+  </view>
+  <view class="panel chart-panel">
+    <view class="chart-bars">
+      <view class="chart-col" wx:for="{{chart}}" wx:key="weekday">
+        <text class="chart-val num">{{item.value}}</text>
+        <view class="chart-track">
+          <view class="chart-fill {{item.has ? 'on' : ''}}" style="height: {{item.pct}}%;"></view>
+        </view>
+        <text class="chart-label">{{item.weekday}}</text>
+      </view>
+    </view>
+    <text wx:if="{{!hasChartData}}" class="chart-foot">{{t.trendEmpty}}</text>
+  </view>
+
   <!-- 近 7 天打卡条：未签到是可点按钮，已签到是非按钮状态标签（避免“禁用按钮当提示”的反模式） -->
   <view class="section">
     <text class="section-title">{{t.weekCheckin}}</text>
     <view wx:if="{{checkedToday}}" class="pill pill-done">✓ {{t.checked}}</view>
     <button wx:else class="pill pill-solid" bindtap="checkin">{{t.checkin}}</button>
+  </view>
+  <view wx:if="{{streakLabel}}" class="streak-row">
+    <view class="streak-dot"></view>
+    <text class="streak-text">{{streakLabel}}</text>
   </view>
   <view class="panel">
     <view class="week-strip">

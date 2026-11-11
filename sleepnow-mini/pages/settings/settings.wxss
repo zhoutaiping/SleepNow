@@ -25,6 +25,19 @@
   box-sizing: border-box;
 }
 
+/* 访客价值引导 */
+.guest-benefits { padding: 28rpx 32rpx; }
+.gb-title { display: block; font-size: 24rpx; font-weight: 600; color: var(--text-sub); margin-bottom: 18rpx; }
+.gb-item { display: flex; align-items: center; padding: 10rpx 0; }
+.gb-dot {
+  width: 10rpx; height: 10rpx;
+  flex: none;
+  margin-right: 18rpx;
+  background: var(--text);
+  border-radius: var(--radius-pill);
+}
+.gb-text { font-size: 26rpx; color: var(--text); line-height: 1.5; }
+
 /* 成就数据 */
 .ov-unit { font-size: 22rpx; font-weight: 500; color: var(--text-sub); margin-left: 4rpx; letter-spacing: 0; }
 

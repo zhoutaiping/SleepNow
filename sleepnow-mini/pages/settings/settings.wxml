@@ -20,6 +20,14 @@
     <button wx:if="{{user}}" class="hero-btn hero-btn-ghost profile-cta" bindtap="onLogout">{{t.logout}}</button>
   </view>
 
+  <!-- 访客价值：未登录时展示登录好处，降低决策门槛（参照健康类 App 的注册引导） -->
+  <view wx:if="{{!user && !loading}}" class="card guest-benefits">
+    <text class="gb-title">{{t.benefitsTitle}}</text>
+    <view class="gb-item"><view class="gb-dot"></view><text class="gb-text">{{t.benefit1}}</text></view>
+    <view class="gb-item"><view class="gb-dot"></view><text class="gb-text">{{t.benefit2}}</text></view>
+    <view class="gb-item"><view class="gb-dot"></view><text class="gb-text">{{t.benefit3}}</text></view>
+  </view>
+
   <!-- 成就数据 -->
   <view class="section"><text class="section-title">{{t.achievement}}</text></view>
   <view class="panel overview-panel">

@@ -190,8 +190,32 @@ function goalPercent(mins, goal) {
   return Math.max(0, Math.min(100, Math.round((Number(mins) || 0) / g * 100)));
 }
 
+// 近 n 天每日睡眠时长柱状图数据（健身 App 的「每周训练时长」范式）
+// 基线取 max(目标 8h, 区间最大值)，让达标夜填满、未达标按比例；空日 pct=0 由页面渲染灰底占位
+function buildWeekChart(logs, days, lang) {
+  const dayMap = {};
+  (logs || []).forEach((r) => {
+    const d = String(r.sleep_date || '').slice(0, 10);
+    if (!dayMap[d]) dayMap[d] = { sum: 0, count: 0 };
+    dayMap[d].sum += Number(r.duration_min) || 0;
+    dayMap[d].count += 1;
+  });
+  const averages = days.map((d) => (dayMap[d] ? dayMap[d].sum / dayMap[d].count : 0));
+  const max = Math.max(GOAL_MINUTES, ...averages);
+  return days.map((d) => {
+    const avg = dayMap[d] ? dayMap[d].sum / dayMap[d].count : 0;
+    const pct = max > 0 ? Math.min(100, Math.round((avg / max) * 100)) : 0;
+    return {
+      weekday: weekdayLabel(d, lang),
+      value: avg > 0 ? (avg / 60).toFixed(1) : '',
+      pct,
+      has: !!dayMap[d],
+    };
+  });
+}
+
 module.exports = {
   GOAL_MINUTES, pad, dateStr, parseDate, lastNDays, offsetStr,
   weekdayLabel, todayLabel, durationParts, formatDuration, shortDuration,
-  buildRing, buildWeekStrip, summarize, recentLogs, goalPercent,
+  buildRing, buildWeekStrip, summarize, recentLogs, goalPercent, buildWeekChart,
 };

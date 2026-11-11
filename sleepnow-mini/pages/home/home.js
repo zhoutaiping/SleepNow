@@ -21,6 +21,7 @@ const TEXT_KEYS = {
   recommend: 'home.recommend', recent: 'home.recent',
   recentEmpty: 'home.recentEmpty', goLog: 'home.goLog',
   checkin: 'home.checkin', checked: 'home.checked',
+  trend: 'home.trend', trendEmpty: 'home.trendEmpty', streakBadge: 'home.streakBadge',
   add: 'log.add', footer: 'settings.footer',
   loadError: 'home.loadError', retry: 'common.retry',
 };
@@ -37,6 +38,7 @@ Page({
     // 周打卡
     week: [], streak: 0, checkedToday: false,
     recommend: [], recent: [], isGuest: false,
+    chart: [], streakLabel: '', hasChartData: false,
     loadError: false,
   },
 
@@ -133,6 +135,11 @@ Page({
       checkedToday: s.checkinDates.indexOf(today) !== -1,
       recent: D.recentLogs(logs, 3, lang),
       isGuest,
+      chart: D.buildWeekChart(logs, days, lang),
+      hasChartData: s.recordDays > 0,
+      streakLabel: s.streak > 0
+        ? i18n.t('home.streakBadge').replace('{n}', s.streak)
+        : '',
     });
   },
 

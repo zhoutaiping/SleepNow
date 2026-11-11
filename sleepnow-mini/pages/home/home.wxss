@@ -56,3 +56,44 @@
 
 /* 首页空态比通用样式更轻：标题用次级灰 */
 .empty-panel .empty-title { color: var(--text-sub); font-size: 26rpx; font-weight: 500; }
+
+/* 近 7 天睡眠时长柱状图（健身 App 的每周训练时长范式，黑白灰、无渐变） */
+.chart-panel { padding: 28rpx 24rpx 24rpx; }
+.chart-bars { display: flex; align-items: flex-end; justify-content: space-between; height: 200rpx; }
+.chart-col { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; }
+.chart-val {
+  font-size: 22rpx; color: var(--text-sub);
+  height: 30rpx; line-height: 30rpx; margin-bottom: 8rpx;
+  font-variant-numeric: tabular-nums;
+}
+.chart-track {
+  flex: 1; width: 100%;
+  display: flex; align-items: flex-end; justify-content: center;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.chart-fill {
+  width: 56%;
+  min-height: 4rpx;
+  background: transparent;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  transition: height 280ms ease;
+}
+.chart-fill.on { background: var(--text); } /* 空日不画假数据，仅灰底轨道可见 */
+.chart-label { font-size: 22rpx; color: var(--text-sub); margin-top: 12rpx; }
+.chart-foot {
+  display: block; text-align: center;
+  font-size: 22rpx; color: var(--text-3);
+  margin-top: 18rpx; line-height: 1.6;
+}
+
+/* 连续签到徽章：健身 App 的 streak 激励 */
+.streak-row { display: flex; align-items: center; margin: -4rpx 4rpx 8rpx; }
+.streak-dot {
+  width: 12rpx; height: 12rpx;
+  margin-right: 12rpx;
+  background: var(--text);
+  border-radius: var(--radius-pill);
+}
+.streak-text { font-size: 24rpx; font-weight: 600; color: var(--text); }

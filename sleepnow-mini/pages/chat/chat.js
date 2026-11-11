@@ -21,7 +21,8 @@ const TEXT_KEYS = {
   quotaUnit: 'chat.quotaUnit', quotaLeft: 'chat.quotaLeft',
   quotaReached: 'chat.quotaReached',
   modelLabel: 'chat.modelLabel', modelAuto: 'chat.modelAuto',
-  modelHint: 'chat.modelHint', chooseModel: 'chat.chooseModel',
+  modelHint: 'chat.modelHint',   chooseModel: 'chat.chooseModel',
+  modelSheetHint: 'chat.modelSheetHint',
   cancel: 'chat.cancel', noModel: 'chat.noModel',
   thinking: 'chat.thinking', you: 'chat.you', assistant: 'chat.assistant',
   composerHint: 'chat.composerHint', send: 'chat.send', stop: 'chat.stop',
@@ -65,6 +66,8 @@ Page({
     models: [],
     model: '',
     modelName: '',
+    modelGroups: [],
+    showSafetyNote: false,
     showModelSheet: false,
     isGenerating: false,
     inputText: '',
@@ -78,6 +81,7 @@ Page({
     errorText: '',
     retryUser: '',
     quota: { used: 0, limit: S.DAILY_QUOTA, left: S.DAILY_QUOTA, canSend: true },
+    quotaPct: 0,
     safetyMode: moderation.getMode(),
   },
 
@@ -186,14 +190,14 @@ Page({
     const identity = auth.getIdentity();
     let used = 0;
     try { used = wx.getStorageSync(S.quotaKey(identity.uid)) || 0; } catch (e) { used = 0; }
-    this.setData({ quota: S.quotaState(used) });
+    this.setData({ quota: S.quotaState(used), quotaPct: Math.min(100, Math.round(used / S.DAILY_QUOTA * 100)) });
   },
 
   bumpQuota() {
     const identity = auth.getIdentity();
     const used = (this.data.quota.used || 0) + 1;
     try { wx.setStorageSync(S.quotaKey(identity.uid), used); } catch (e) {}
-    this.setData({ quota: S.quotaState(used) });
+    this.setData({ quota: S.quotaState(used), quotaPct: Math.min(100, Math.round(used / S.DAILY_QUOTA * 100)) });
   },
 
   // ---------- 交互 ----------
@@ -517,7 +521,38 @@ Page({
   onPickModel() {
     if (this.data.isGenerating) return;
     if (!this.data.models.length) { this.loadModels(); return; }
+    this.buildModelGroups();
     this.setData({ showModelSheet: true });
+  },
+
+  // 按能力分组（文本陪伴 / 图像生成 / 视频生成），开发态提示仅在 local 模式出现
+  buildModelGroups() {
+    const lang = i18n.getLang();
+    const kindOf = (m) => {
+      const n = String(m.name || m.id || '').toLowerCase();
+      if (/image/.test(n)) return 'image';
+      if (/video/.test(n)) return 'video';
+      return 'text';
+    };
+    const groups = { text: [], image: [], video: [] };
+    (this.data.models || []).forEach((m) => {
+      const k = kindOf(m);
+      groups[k].push(Object.assign({}, m, {
+        kindLabel: i18n.t('chat.kind' + k.charAt(0).toUpperCase() + k.slice(1)),
+        current: i18n.t('chat.current'),
+        active: m.id === this.data.model,
+      }));
+    });
+    const labels = {
+      text: i18n.t('chat.groupText'),
+      image: i18n.t('chat.groupImage'),
+      video: i18n.t('chat.groupVideo'),
+    };
+    const order = ['text', 'image', 'video'];
+    const modelGroups = order
+      .filter((k) => groups[k].length)
+      .map((k) => ({ key: k, label: labels[k], items: groups[k] }));
+    this.setData({ modelGroups, showSafetyNote: this.data.safetyMode === 'local' });
   },
 
   onSelectModel(e) {

@@ -132,7 +132,7 @@
 .msg-time { font-variant-numeric: tabular-nums; }
 
 .bubble {
-  max-width: 86%;
+  max-width: 80%;
   padding: 24rpx 28rpx;
   border-radius: var(--radius-md);
   font-size: 28rpx;
@@ -140,6 +140,8 @@
   white-space: pre-wrap;
   word-break: break-word;
 }
+/* 用户气泡收窄，短消息不再被撑成方块（健身/聊天 App 的常规做法） */
+.bubble.user { max-width: 72%; }
 .bubble.user { background: var(--primary); color: var(--on-primary); border-bottom-right-radius: 6rpx; }
 .bubble.assistant {
   background: var(--card);
@@ -204,6 +206,21 @@
   justify-content: space-between;
   min-height: 28rpx;
   margin-bottom: 12rpx;
+}
+/* 额度进度条：健身 App 的「今日完成度」范式，黑白灰无彩色 */
+.quota-bar {
+  width: 100%;
+  height: 6rpx;
+  background: var(--surface);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  margin-bottom: 14rpx;
+}
+.quota-fill {
+  height: 100%;
+  background: var(--text);
+  border-radius: var(--radius-pill);
+  transition: width 280ms ease;
 }
 .composer-quota, .composer-count { font-size: 22rpx; color: var(--text-3); font-variant-numeric: tabular-nums; }
 .composer-live { display: flex; align-items: center; }
@@ -334,8 +351,34 @@
   padding: 32rpx 32rpx calc(32rpx + env(safe-area-inset-bottom));
   box-sizing: border-box;
 }
-.sheet-title { text-align: center; font-size: 26rpx; color: var(--text-sub); margin-bottom: 20rpx; }
-.sheet-item { padding: 26rpx; text-align: center; font-size: 28rpx; border-radius: var(--radius-sm); }
-.sheet-item.active { background: var(--surface); color: var(--text); font-weight: 700; }
+.sheet-title { display: block; font-size: 30rpx; font-weight: 700; color: var(--text); }
+.sheet-sub { display: block; font-size: 22rpx; color: var(--text-3); margin-top: 6rpx; line-height: 1.5; }
+.sheet-head { margin-bottom: 8rpx; }
+.sheet-group {
+  display: block;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: var(--text-sub);
+  margin: 22rpx 4rpx 10rpx;
+}
+.sheet-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 26rpx;
+  font-size: 28rpx;
+  border: 1rpx solid transparent;
+  border-radius: var(--radius-sm);
+}
+.sheet-item.active {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--text);
+  font-weight: 700;
+}
+.sheet-item-main { display: flex; flex-direction: column; min-width: 0; }
+.sheet-item-name { font-size: 28rpx; }
+.sheet-item-kind { font-size: 22rpx; color: var(--text-3); margin-top: 4rpx; }
+.sheet-item-current { font-size: 22rpx; font-weight: 600; color: var(--text-sub); flex: none; margin-left: 16rpx; }
 .sheet-safety { text-align: center; font-size: 22rpx; color: var(--text-3); padding: 16rpx 0; }
 .sheet-cancel { margin-top: 16rpx; padding: 26rpx; text-align: center; font-size: 28rpx; color: var(--text-sub); }

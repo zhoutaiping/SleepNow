@@ -108,6 +108,7 @@
       </view>
       <text wx:else class="composer-count">{{inputLen}}/500</text>
     </view>
+    <view class="quota-bar"><view class="quota-fill" style="width: {{quotaPct}}%;"></view></view>
     <view class="composer-row">
       <!-- 麦克风：轻点开始 / 再点结束；按住可直接说话，松手结束 -->
       <view
@@ -146,18 +147,31 @@
     <text class="composer-disclaimer">{{t.disclaimerShort}}</text>
   </view>
 
-  <!-- 模型选择弹层 -->
+  <!-- 模型选择弹层：按能力分组，开发态提示仅 local 模式以极小灰字出现 -->
   <view wx:if="{{showModelSheet}}" class="sheet-mask" bindtap="onCloseSheet">
     <view class="sheet" catchtap="noop">
-      <view class="sheet-title">{{t.chooseModel}}</view>
-      <view
-        wx:for="{{models}}"
-        wx:key="id"
-        class="sheet-item {{model === item.id ? 'active' : ''}}"
-        data-id="{{item.id}}"
-        bindtap="onSelectModel"
-      >{{item.name}}</view>
-      <view wx:if="{{safetyMode === 'local'}}" class="sheet-safety">{{t.safetyDev}}</view>
+      <view class="sheet-head">
+        <text class="sheet-title">{{t.chooseModel}}</text>
+        <text class="sheet-sub">{{t.modelSheetHint}}</text>
+      </view>
+      <block wx:for="{{modelGroups}}" wx:key="key" wx:for-item="grp">
+        <text class="sheet-group">{{grp.label}}</text>
+        <view
+          wx:for="{{grp.items}}"
+          wx:key="id"
+          wx:for-item="m"
+          class="sheet-item {{m.active ? 'active' : ''}}"
+          data-id="{{m.id}}"
+          bindtap="onSelectModel"
+        >
+          <view class="sheet-item-main">
+            <text class="sheet-item-name">{{m.name}}</text>
+            <text class="sheet-item-kind">{{m.kindLabel}}</text>
+          </view>
+          <text wx:if="{{m.active}}" class="sheet-item-current">{{m.current}}</text>
+        </view>
+      </block>
+      <view wx:if="{{showSafetyNote}}" class="sheet-safety">{{t.safetyDev}}</view>
       <view class="sheet-cancel" bindtap="onCloseSheet">{{t.cancel}}</view>
     </view>
   </view>
