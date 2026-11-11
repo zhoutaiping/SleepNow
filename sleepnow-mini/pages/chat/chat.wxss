@@ -191,40 +191,113 @@
 .error-text { font-size: 24rpx; color: var(--text); flex: 1; }
 .error-retry { font-size: 24rpx; font-weight: 700; margin-left: 16rpx; text-decoration: underline; flex: none; }
 
-/* ---------- 输入区 ---------- */
+/* ---------- 输入区：严格单行的三元素输入栏 ---------- */
 .composer {
   flex: none;
   padding: 16rpx 32rpx calc(20rpx + env(safe-area-inset-bottom));
   border-top: 1rpx solid var(--border);
   background: var(--bg);
 }
-.composer-top { display: flex; justify-content: space-between; margin-bottom: 12rpx; }
+.composer-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 28rpx;
+  margin-bottom: 12rpx;
+}
 .composer-quota, .composer-count { font-size: 20rpx; color: var(--text-3); font-variant-numeric: tabular-nums; }
-.composer-row { display: flex; align-items: flex-end; gap: 16rpx; }
+.composer-live { display: flex; align-items: center; }
+.live-dot {
+  width: 12rpx;
+  height: 12rpx;
+  margin-right: 10rpx;
+  border-radius: var(--radius-pill);
+  background: var(--text);
+  animation: voice-pulse 1.2s ease-in-out infinite;
+}
+@keyframes voice-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+.live-cancel {
+  font-size: 20rpx;
+  color: var(--text-sub);
+  margin-left: 14rpx;
+  text-decoration: underline;
+}
+
+/* 麦克风 / 输入框 / 发送按钮：三者同一基线、同一高度，整栏只占一行 */
+.composer-row { display: flex; align-items: center; gap: 12rpx; }
+.voice-btn {
+  flex: none;
+  width: 88rpx;
+  height: 88rpx;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  border: 1rpx solid var(--border);
+  background: var(--card);
+}
+.voice-btn.active {
+  background: var(--primary);
+  color: var(--on-primary);
+  border-color: var(--primary);
+}
+/* 纯 CSS 麦克风：不用 emoji / 不用图片，深浅主题都随 token 反相 */
+.mic { position: relative; width: 32rpx; height: 44rpx; }
+.mic-cap {
+  position: absolute; left: 9rpx; top: 0;
+  width: 14rpx; height: 24rpx;
+  border-radius: 7rpx;
+  background: var(--text);
+}
+.mic-arc {
+  position: absolute; left: 2rpx; top: 14rpx;
+  width: 28rpx; height: 24rpx;
+  box-sizing: border-box;
+  border: 3rpx solid var(--text);
+  border-top: none;
+  border-radius: 0 0 14rpx 14rpx;
+}
+.mic-stem {
+  position: absolute; left: 15rpx; top: 36rpx;
+  width: 3rpx; height: 6rpx;
+  background: var(--text);
+}
+.mic-base {
+  position: absolute; left: 8rpx; top: 41rpx;
+  width: 17rpx; height: 3rpx;
+  border-radius: 2rpx;
+  background: var(--text);
+}
+.voice-btn.active .mic-cap,
+.voice-btn.active .mic-stem,
+.voice-btn.active .mic-base { background: var(--on-primary); }
+.voice-btn.active .mic-arc { border-color: var(--on-primary); }
+
 .input {
   flex: 1;
-  min-height: 80rpx;
-  max-height: 220rpx;
-  padding: 20rpx 26rpx;
+  min-width: 0;
+  height: 88rpx;
+  line-height: 88rpx;
+  padding: 0 24rpx;
   background: var(--card);
   border: 1rpx solid var(--border);
   border-radius: var(--radius-md);
   font-size: 28rpx;
-  line-height: 1.5;
   color: var(--text);
   box-sizing: border-box;
 }
 .input-ph { color: var(--text-3); }
 .send-btn {
   flex: none;
-  min-width: 128rpx;
-  height: 80rpx;
-  line-height: 80rpx;
-  padding: 0 28rpx;
+  width: 112rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  padding: 0;
   background: var(--primary);
   color: var(--on-primary);
   border-radius: var(--radius-md);
-  font-size: 28rpx;
+  font-size: 26rpx;
   font-weight: 700;
   text-align: center;
 }
@@ -239,6 +312,10 @@
   font-size: 20rpx;
   color: var(--text-3);
   margin-top: 14rpx;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-dot { animation: none; }
 }
 
 /* ---------- 模型弹层 ---------- */

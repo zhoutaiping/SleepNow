@@ -97,22 +97,48 @@
     <text class="error-retry">{{t.retry}}</text>
   </view>
 
-  <!-- 输入区：额度 + 字数 + 明确文字的发送按钮 + 免责声明 -->
+  <!-- 输入区：额度 + 录音状态 / 字数 · 单行输入栏（麦克风 + 单行 input + 发送） · 免责声明 -->
   <view class="composer">
     <view class="composer-top">
       <text class="composer-quota">{{t.quota}} {{quota.used}}/{{quota.limit}} {{t.quotaUnit}} · {{t.quotaLeft}} {{quota.left}}</text>
-      <text class="composer-count">{{inputLen}}/500</text>
+      <view wx:if="{{voiceState !== 'idle'}}" class="composer-live">
+        <view class="live-dot"></view>
+        <text class="composer-count">{{voiceTip}} · {{voiceSeconds}}s</text>
+        <text class="live-cancel" bindtap="onVoiceCancel">{{t.cancel}}</text>
+      </view>
+      <text wx:else class="composer-count">{{inputLen}}/500</text>
     </view>
     <view class="composer-row">
-      <textarea
+      <!-- 麦克风：轻点开始 / 再点结束；按住可直接说话，松手结束 -->
+      <view
+        class="voice-btn {{voiceState !== 'idle' ? 'active' : ''}}"
+        aria-role="button"
+        aria-label="{{voiceState !== 'idle' ? t.voiceStopHint : t.voiceStart}}"
+        bindtap="onVoiceTap"
+        bindlongpress="onVoiceLongPress"
+        bindtouchend="onVoiceTouchEnd"
+        bindtouchcancel="onVoiceCancel"
+      >
+        <view class="mic">
+          <view class="mic-cap"></view>
+          <view class="mic-arc"></view>
+          <view class="mic-stem"></view>
+          <view class="mic-base"></view>
+        </view>
+      </view>
+      <input
         class="input"
         value="{{inputText}}"
+        focus="{{inputFocus}}"
         bindinput="onInput"
-        placeholder="{{t.composerHint}}"
+        bindblur="onInputBlur"
+        bindconfirm="onSend"
+        confirm-type="send"
+        cursor-spacing="24"
+        placeholder="{{voiceState !== 'idle' ? t.voiceListening : t.composerHint}}"
         placeholder-class="input-ph"
-        auto-height
         maxlength="500"
-        disabled="{{isGenerating}}"
+        disabled="{{isGenerating || voiceState === 'recognizing'}}"
       />
       <view wx:if="{{isGenerating}}" class="send-btn stop" bindtap="onStop">{{t.stop}}</view>
       <view wx:else class="send-btn" bindtap="onSend">{{t.send}}</view>

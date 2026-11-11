@@ -172,3 +172,27 @@ function buildTexts() {
 
 > 主体/类目/算法备案、云端内容安全、日志留存等工程之外的合规项，见
 > 《晚安开关小程序-AI接入实操方案.md》。个人主体下 AI 对话**不可直接提审**。
+
+## 9. 输入栏规范（v1.3 · 严格单行 + 语音输入）
+
+陪伴页输入区此前是 `textarea + auto-height`，会随文字长高，把底部操作区撑成两三行，
+挤压消息可视区。现固定为**一条水平输入栏**：
+
+```
+[ 88rpx 圆形麦克风 ] [ flex:1 单行 input ] [ 112rpx 文字发送 ]
+        ↑ gap 12rpx，三者同高 88rpx，align-items: center
+```
+
+| 规则 | 说明 |
+|------|------|
+| 单行 | 只用 `<input>`；**禁止 `textarea` / `auto-height` / 弹性 min-height**；长文本在框内横向滚动 |
+| 键盘 | `confirm-type="send"` + `bindconfirm`；`cursor-spacing` 防遮挡；`focus` 由页面控制，`bindblur` 复位 |
+| 按钮 | 发送 / 停止始终带**可读文字**，不做无字纯色圆按钮（沿用 8.1） |
+| 状态行 | 额度行右侧在录音时变为「脉冲点 + 正在聆听/正在转成文字 + 秒数 + 取消」，不新增第二行输入控件 |
+| 录音态 | 麦克风圆钮反相（`--primary` + `--on-primary`），CSS 麦克风图形同步反相；禁用 emoji / 图片图标 |
+| 动效 | 脉冲用 `opacity`，遵守 `prefers-reduced-motion`；无彩色、无渐变 |
+| 语义 | 语音只把声音变成输入框里的文字，**绝不自动发送**；发送前照常走输入侧内容安全 |
+
+`scripts/check-chat.js` 已加静态断言：不得再出现 `<textarea>` / `auto-height`，
+三元素必须同为 88rpx，且 `confirm-type="send"` 与 `focus` 绑定存在。
+语音能力的主体差异与三条接入路径见《晚安开关小程序-AI接入实操方案.md》第 10 节。

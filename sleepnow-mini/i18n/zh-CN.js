@@ -189,4 +189,15 @@ module.exports = {
   'chat.sceneLocked': '等这一句说完再切换',
   'chat.safetyDev': '开发态：云端内容安全未启用',
   'chat.clear': '清空',
+  // ===== 语音输入（个人主体默认走系统键盘麦克风） =====
+  'chat.voiceStart': '语音输入',
+  'chat.voiceListening': '正在聆听',
+  'chat.voiceRecognizing': '正在转成文字',
+  'chat.voiceStopHint': '轻点结束，或松手结束',
+  'chat.voiceKeyboard': '点键盘上的麦克风说话',
+  'chat.voiceAuth': '需要麦克风权限才能语音输入',
+  'chat.voiceOpen': '去开启',
+  'chat.voiceEmpty': '没听清，再说一次试试',
+  'chat.voiceFail': '语音输入暂不可用，试试键盘输入',
+  'chat.voiceDone': '已转成文字，确认后发送',
 };

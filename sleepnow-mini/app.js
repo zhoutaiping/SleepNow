@@ -9,6 +9,12 @@ App({
   onLaunch() {
     theme.initTheme();
     i18n.initI18n();
+    // 语音输入默认走系统键盘麦克风（个人主体零配置可用）。
+    // 若要 App 内录音转文字，二选一（详见《AI 接入实操方案》第 10 节）：
+    //   1) 企业主体：app.json 声明 WechatSI 插件 + 后台添加，utils/speech.js 自动启用
+    //   2) 任意主体：wx.cloud.init({ env: '你的环境ID' })
+    //                require('./utils/speech').enableCloudASR({ name: 'speechToText' })
+    // 不要在此处写任何 SecretId / SecretKey，密钥只能放云函数环境变量。
   },
   onShow(options) {
     // WorkBuddy 小程序账号登录回调：在任意登录守卫/查询之前处理

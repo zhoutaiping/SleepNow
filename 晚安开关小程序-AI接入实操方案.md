@@ -1,7 +1,8 @@
 # 晚安开关小程序 · AI 接入实操方案
 
-> 版本 v1.0 ｜ 2026-11-11 ｜ 适用工程：`sleepnow-mini/`（原生微信小程序 + WorkBuddy 云服务）
+> 版本 v1.1 ｜ 2026-11-11 ｜ 适用工程：`sleepnow-mini/`（原生微信小程序 + WorkBuddy 云服务）
 > 配套交付：陪伴页 v2 重构、场景化 Prompt 引擎、内容安全抽象层
+> v1.1 追加：第 10 节「语音输入」——输入框改严格单行 + 三档可插拔 ASR
 > 状态：**开发态可跑通；正式提审前必须先完成第 0 节的主体/类目决策**
 
 ---
@@ -406,3 +407,187 @@ node scripts/check-chat.js        # 本轮：Prompt / 会话 / 审核 / 页面�
 ---
 
 > ⚠️ 再次强调：本方案解决的是「**怎么接**」，不替代「**能不能上**」。个人主体下请先在 0.3 里选定路径再投入提审准备。
+
+---
+
+## 10. 语音输入（v1.1 · 输入区改严格单行）
+
+### 10.1 结论先行：个人主体用不了「同声传译」插件
+
+微信官方插件 **WechatSI**（`wx069ba97219f66d99`）最省事，但它的服务类目是「IT 科技 > 软件服务提供商」，
+微信开放社区明确答复：**该服务类目不在个人主体开放范围内，个人主体小程序无法添加该插件**；
+企业主体在开发版/体验版可用，个人主体即便能配置，正式版也会因主体资质校验失败。
+
+另一个坑：**必须在小程序后台添加插件后，才能在 `app.json` 写 `plugins` 声明**。
+顺序反了，开发者工具会报「插件未授权使用」甚至直接白屏。因此本工程**默认不声明任何插件**，
+由 `utils/speech.js` 在运行时懒检测，检测不到就安静降级，对现有 Demo 零副作用。
+
+### 10.2 三档 provider
+
+| 模式 | 主体要求 | 后端 | 录音权限 | 实时识别 | 默认 |
+|------|---------|------|---------|---------|------|
+| `keyboard` 系统键盘麦克风 | 无（个人主体可用） | 不需要 | 不需要 | 由输入法提供 | ✅ **默认** |
+| `plugin` 微信同声传译 | **企业/个体工商户** | 不需要 | 需要 | ✅ 边说边出字 | 配置后自动启用 |
+| `cloud` 云函数 ASR | 无（云开发个人可用） | 需要云函数 + 腾讯云 ASR | 需要 | ❌ 说完一次性返回 | 一行代码启用 |
+
+优先级 `plugin > cloud > keyboard`，由 `speech.getMode()` 自动判定；页面只认状态，不关心底层是谁。
+
+- **默认路径真能用的语音输入**：轻点麦克风 → 聚焦单行输入框 → 用户点微信键盘 / 系统输入法的麦克风说话 →
+  文字直接落到输入框。不需要插件、不需要 AppID 资质、不需要后端、不申请 `scope.record`。
+  ⚠️ 开发者工具模拟器没有键盘麦克风，**必须真机验证**。
+- **插件路径**：边说边把 `onRecognize` 的实时文字追加进输入框，松手/再点后定稿。
+- **云 ASR 路径**：`wx.getRecorderManager` 录 30s/16kHz 单声道 mp3 → 临时文件交云函数 → 返回文本。
+  录音文件不落库、不进聊天记录，识别后立即删除云端临时文件。
+
+### 10.3 交互与合规约定
+
+```
+轻点麦克风 → 开始录音（额度行变「脉冲点 + 正在聆听 + 秒数 + 取消」，麦克风反相）
+再点 / 松手 → 结束 → 正在转成文字 → 文本追加进输入框
+用户可编辑 → 点「发送」→ moderation.checkInput → LLM → 输出审核（链路完全不变）
+```
+
+| 约定 | 原因 |
+|------|------|
+| **绝不自动发送** | 语音识别有误，用户必须能看一眼再发；也让输入侧审核保持单一入口 |
+| 追加到已有文字后 | `mergeText()` 中文直连、英文补空格，不覆盖用户已输入内容 |
+| 上限 500 字 / 30 秒 | 与输入框 `maxlength` 一致；30s 覆盖腾讯云「一句话识别」的时长限制 |
+| 取消 / 页面卸载一律清状态 | 迟到的 `onStop` / `onRecognize` 会被 `cancelled` 丢弃，不留空气泡、不留 interval |
+| 录音中禁止生成态切换 | 与既有 `isGenerating` 守卫一致 |
+
+### 10.4 路径 1 · 企业主体启用「同声传译」
+
+```bash
+# ① 小程序后台：设置 → 第三方设置 → 插件管理 → 添加插件
+#    搜索「微信同声传译」或 AppID wx069ba97219f66d99，等待通过
+# ② 只有①完成后，才在 app.json 追加：
+```
+
+```json
+"plugins": {
+  "WechatSI": {
+    "version": "0.3.5",
+    "provider": "wx069ba97219f66d99"
+  }
+}
+```
+
+代码**无需改动**：`speech.js` 的 `requirePlugin('WechatSI')` 会成功，`getMode()` 自动变成 `plugin`。
+`lang` 按当前 i18n 自动映射 `zh_CN` / `en_US`。
+
+### 10.5 路径 2 · 任意主体启用云函数 ASR
+
+**① `app.js` 的 `onLaunch` 里加两行**
+
+```js
+wx.cloud.init({ env: '你的云开发环境ID', traceUser: true });
+require('./utils/speech').enableCloudASR({ name: 'speechToText' });
+```
+
+`enableCloudASR()` 内部只做两件事：`cloud.uploadFile` 传临时录音 → `cloud.callFunction` 拿 `{ text }`。
+前端**只传 fileID，不接触任何密钥**。
+
+**② 云函数 `cloudfunctions/speechToText/index.js`**
+
+```js
+const cloud = require('wx-server-sdk');
+const tencentcloud = require('tencentcloud-sdk-nodejs');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+
+cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
+const AsrClient = tencentcloud.asr.v20190614.Client;
+
+exports.main = async (event) => {
+  const { fileID, lang = 'zh_CN' } = event || {};
+  if (!fileID) return { text: '' };
+  const tmp = path.join(os.tmpdir(), 'asr-' + Date.now() + '.mp3');
+  try {
+    const res = await cloud.downloadFile({ fileID });
+    fs.writeFileSync(tmp, res.fileContent);
+    const audio = fs.readFileSync(tmp);
+    const client = new AsrClient({
+      credential: {
+        secretId: process.env.TENCENTCLOUD_SECRET_ID,   // 云函数环境变量，绝不下发前端
+        secretKey: process.env.TENCENTCLOUD_SECRET_KEY,
+      },
+      region: 'ap-shanghai',
+      profile: { requestTimeout: 10000 },
+    });
+    const r = await client.SentenceRecognition({
+      ProjectId: 0,
+      SubServiceType: 2,
+      EngSerViceType: lang === 'en_US' ? '16k_en' : '16k_zh',
+      SourceType: 1,
+      VoiceFormat: 'mp3',
+      UsrAudioKey: 'sleepnow-' + Date.now(),
+      Data: audio.toString('base64'),
+      DataLen: audio.length,
+    });
+    return { text: (r && r.Result) || '' };
+  } catch (e) {
+    return { text: '', error: String((e && e.message) || e) };
+  } finally {
+    try { fs.unlinkSync(tmp); } catch (e) {}
+    try { await cloud.deleteFile({ fileList: [fileID] }); } catch (e) {} // 不留存录音
+  }
+};
+```
+
+**③ `cloudfunctions/speechToText/package.json`**
+
+```json
+{
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3",
+    "tencentcloud-sdk-nodejs": "^4.0.0"
+  }
+}
+```
+
+> 需在腾讯云开通「语音识别 - 一句话识别」，密钥配置为云函数环境变量；计费与免费额度以控制台为准。
+> 若已有自建 BFF，也可 `configureRecognizer(async (filePath, meta) => ...)` 换成自己的 HTTPS 上传接口。
+
+### 10.6 权限与隐私清单
+
+| 项 | 说明 |
+|----|------|
+| `scope.record` | 仅 `plugin` / `cloud` 模式申请；首次由 `wx.authorize` 弹系统框，被拒过则 `wx.showModal` 引导 `openSetting` |
+| 隐私政策 | 启用 App 内录音后，必须在隐私清单/用户协议补「麦克风：用于语音转文字，仅识别期间临时处理，不留存原始音频」 |
+| 数据留存 | 录音临时文件识别后即删；聊天记录仍沿用既有 `wx.setStorage` 本地存储，不因语音新增云端数据 |
+| AI 标识 | 语音只是输入方式，不改变生成内容属性，第 2.4 节的标识全部保持不变 |
+
+### 10.7 本轮改动文件
+
+| 文件 | 变更 |
+|------|------|
+| `pages/chat/chat.wxml` | 输入区改为「麦克风 + 单行 `input` + 发送」一行；额度行复用为录音状态行 |
+| `pages/chat/chat.wxss` | 三元素同高 88rpx、纯 CSS 麦克风（随主题反相）、脉冲动效、减弱动效适配 |
+| `pages/chat/chat.js` | 新增语音状态机（点击/长按/取消）、结果只填字不发送、`TEXT_KEYS` 扩 10 个词条 |
+| `utils/speech.js` | **新增**：三档 provider 抽象层、权限、录音、识别、取消、错误回调 |
+| `i18n/zh-CN.js` · `en-US.js` | 各 +10 条语音词条（zh/en 各 193 条，对齐） |
+| `app.js` | 两种增强模式的启用位置（注释示例，默认不启用） |
+| `scripts/check-chat.js` | +22 项：单行静态防复发、三档模式、录音状态机、权限、异常、不自动发送 |
+| `design-system/MASTER.md` | 新增第 9 节「输入栏规范」 |
+
+### 10.8 真机验证清单
+
+- [ ] 默认（个人主体 / `touristappid`）：点麦克风 → 键盘弹起 → 用键盘麦克风说话 → 文字进入单行输入框
+- [ ] 输入框长文本横向滚动，**输入栏高度始终不变**
+- [ ] 键盘「发送」键 = 点发送按钮；生成中显示「停止」
+- [ ] 企业主体加插件后：录音态反相、秒数递增、边说边出字、松手定稿
+- [ ] 云 ASR 路径：识别结果填入、原始录音云端已删、云函数日志无密钥
+- [ ] 拒绝麦克风权限 → 弹授权引导；去设置页开启后可正常录音
+- [ ] 录音中点「发送」/「清空」/ 返回上一页：状态复位、无残留计时器、无空气泡
+- [ ] 深色主题下麦克风反相与脉冲点对比度可读；系统「减弱动效」下不再闪烁
+- [ ] 语音识别出的违规样例，仍被 `checkInput` 拦截（合规链路未被绕过）
+
+**验证命令**
+
+```bash
+cd sleepnow-mini
+node scripts/check-theme.js       # 黑白主题 / i18n / token 规范
+node scripts/check-dashboard.js   # 三页聚合与渲染
+node scripts/check-chat.js        # AI 链路 + 单行输入区 + 语音输入
+```

@@ -6,6 +6,7 @@
  * 覆盖：Prompt 引擎（system 首位 / 场景差异 / 上下文裁剪 / 错误分类）、
  *      会话纯函数（历史隔离 / 额度 / 时间）、内容安全（本地 / 云端 / fail-closed）、
  *      页面分支（冷启动文案注入 / 场景切换 / 流式一轮 / 额度计次）、
+ *      语音输入（单行输入栏 / 三档模式 / 录音状态机 / 结果不自动发送）、
  *      静态防复发（wxml 的 {{t.xxx}} 必须由 TEXT_KEYS 注入且词条存在）。
  */
 const fs = require('fs');
@@ -50,17 +51,39 @@ Module._load = function (request, parent, isMain) {
 
 const storage = {};
 const toasts = [];
+const modals = [];
+let recorderInstance = null;
+let recordAuthSetting = { 'scope.record': true };
 global.wx = {
   getStorageSync: (k) => storage[k],
   setStorageSync: (k, v) => { storage[k] = v; },
   setNavigationBarTitle: () => {},
   showToast: (o) => toasts.push(o.title),
-  showModal: () => {},
+  showModal: (o) => { modals.push(o); if (o && o.success) o.success({ confirm: false }); },
+  openSetting: () => {},
   navigateTo: () => {},
   getWindowInfo: () => ({ theme: 'light' }),
   setNavigationBarColor: () => {},
   setBackgroundColor: () => {},
   setTabBarStyle: () => {},
+  // 语音输入依赖：授权状态可切换，RecorderManager 的 stop 同步回抛临时文件
+  getSetting: (o) => { if (o && o.success) o.success({ authSetting: recordAuthSetting }); },
+  authorize: (o) => { if (o && o.success) o.success({}); },
+  getRecorderManager: () => {
+    if (recorderInstance) return recorderInstance;
+    recorderInstance = {
+      options: null,
+      onStop: null,
+      onError: null,
+      start: function (o) { this.options = o; },
+      stop: function () {
+        if (typeof this.onStop === 'function') {
+          this.onStop({ tempFilePath: 'wxfile://tmp_voice.mp3', duration: 1200 });
+        }
+      },
+    };
+    return recorderInstance;
+  },
 };
 
 const llm = require(path.join(ROOT, 'utils/llm'));
@@ -208,6 +231,96 @@ async function main() {
   check('网关错误分类为 network 并给出重试文案',
     page.data.error === 'network' && page.data.errorText === '网络开了小差，点此重试');
   failStream = false;
+
+  // ============ 5. 单行输入区 + 语音输入 ============
+  console.log('=== 单行输入区 / 语音输入 ===');
+  const speech = require(path.join(ROOT, 'utils/speech'));
+  const msgsBefore = page.data.messages.length;
+  const wxml2 = read('pages/chat/chat.wxml');
+  const wxss2 = read('pages/chat/chat.wxss');
+
+  // 静态防复发：输入栏必须严格单行，三元素同高
+  check('输入区改为单行 input（不再用 textarea / auto-height）',
+    /<input[\s\S]*?class="input"/.test(wxml2) && !/<textarea/.test(wxml2) && !/auto-height/.test(wxml2));
+  check('单行输入栏支持键盘发送键与焦点控制',
+    /confirm-type="send"/.test(wxml2) && /bindconfirm="onSend"/.test(wxml2) && /focus="\{\{inputFocus\}\}"/.test(wxml2));
+  check('麦克风 / 输入框 / 发送按钮同为 88rpx 高',
+    /\.voice-btn\s*\{[^}]*height:\s*88rpx/s.test(wxss2)
+    && /\.input\s*\{[^}]*height:\s*88rpx/s.test(wxss2)
+    && /\.send-btn\s*\{[^}]*height:\s*88rpx/s.test(wxss2));
+  check('默认语音模式为 keyboard（个人主体零配置）',
+    page.data.voiceMode === 'keyboard' && speech.getMode() === 'keyboard');
+
+  // 路径 3：无插件 / 无 ASR → 聚焦输入框，交给系统键盘麦克风
+  page.data.inputFocus = false;
+  await page.onVoiceTap();
+  check('未配置插件时聚焦键盘并提示用键盘麦克风',
+    page.data.inputFocus === true && toasts.some((t) => t === '点键盘上的麦克风说话'));
+
+  // 路径 2：注入云 ASR → 走完整录音状态机
+  speech.configureRecognizer(async (file, meta) => {
+    check('识别器收到录音临时文件与时长', !!file && meta.duration > 0);
+    return '我今晚睡不着';
+  });
+  await page.onVoiceTap();
+  check('开始录音：状态 / 提示 / 计时器就绪',
+    page.data.voiceState === 'recording' && page.data.voiceTip === '正在聆听'
+    && page._voiceTimer !== null);
+  check('录音参数：30s 上限 / 16kHz 单声道 mp3',
+    recorderInstance.options && recorderInstance.options.duration === 30000
+    && recorderInstance.options.sampleRate === 16000
+    && recorderInstance.options.format === 'mp3');
+  await page.onVoiceTap();
+  for (let i = 0; i < 8; i++) await tick();
+  check('识别结果填入输入框', page.data.inputText === '我今晚睡不着' && page.data.inputLen === 6);
+  check('语音结果不自动发送（消息数与额度不变）', page.data.messages.length === msgsBefore);
+  check('结束后回到 idle 且计时器已停',
+    page.data.voiceState === 'idle' && page._voiceTimer === null);
+  check('mergeText 中文直连 / 英文补空格',
+    speech.mergeText('帮我', '放松一下') === '帮我放松一下'
+    && speech.mergeText('I', 'am tired') === 'I am tired');
+
+  // 取消分支：丢弃录音，不写入结果
+  page._lastLongPressAt = 0;
+  page.onInput({ detail: { value: '' } });
+  await page.onVoiceTap();
+  check('可再次开始录音', page.data.voiceState === 'recording');
+  page.onVoiceCancel();
+  check('取消后回到 idle 且不写入识别结果',
+    page.data.voiceState === 'idle' && page.data.inputText === '' && page._voiceTimer === null);
+
+  // 空结果 / ASR 异常
+  page._lastLongPressAt = 0;
+  speech.configureRecognizer(async () => '');
+  await page.onVoiceTap();
+  await page.onVoiceTap();
+  for (let i = 0; i < 8; i++) await tick();
+  check('空识别结果给出「没听清」提示', toasts.some((t) => t === '没听清，再说一次试试'));
+  speech.configureRecognizer(async () => { throw new Error('asr down'); });
+  await page.onVoiceTap();
+  await page.onVoiceTap();
+  for (let i = 0; i < 8; i++) await tick();
+  check('ASR 异常给出不可用提示', toasts.some((t) => t === '语音输入暂不可用，试试键盘输入'));
+
+  // 长按：松手结束，且补发的 tap 被抑制
+  await page.onVoiceLongPress();
+  check('长按开始录音', page.data.voiceState === 'recording');
+  page.onVoiceTouchEnd();
+  for (let i = 0; i < 8; i++) await tick();
+  check('松手结束录音并回到 idle', page.data.voiceState === 'idle' && !speech.isRecording());
+  await page.onVoiceTap();
+  check('长按后补发的 tap 被抑制', page.data.voiceState === 'idle');
+
+  // 权限被拒 → 引导去设置页
+  page._lastLongPressAt = 0;
+  recordAuthSetting = { 'scope.record': false };
+  await page.onVoiceTap();
+  check('录音权限被拒时弹出授权引导', modals.length > 0);
+  recordAuthSetting = { 'scope.record': true };
+
+  speech.configureRecognizer(null);
+  check('清空识别器后回到 keyboard 模式', speech.getMode() === 'keyboard');
+  page.onUnload(); // 清掉 interval，避免测试进程挂住
 
   console.log(failed ? `\n❌ AI 链路回归测试失败 ${failed} 项` : '\n✅ AI 链路回归测试全部通过');
   process.exit(failed ? 1 : 0);

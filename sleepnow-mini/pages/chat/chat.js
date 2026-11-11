@@ -8,6 +8,7 @@ const S = require('../../utils/chat-session');
 const auth = require('../../core/auth');
 const i18n = require('../../core/i18n');
 const theme = require('../../core/theme');
+const speech = require('../../utils/speech');
 
 // 驼峰别名 → 词条 key（wxml 统一用 {{t.xxx}}）
 const TEXT_KEYS = {
@@ -33,6 +34,12 @@ const TEXT_KEYS = {
   sceneLocked: 'chat.sceneLocked', safetyDev: 'chat.safetyDev',
   errorQuota: 'chat.errorQuota', errorNetwork: 'chat.errorNetwork',
   errorGeneric: 'chat.errorGeneric',
+  // 语音输入：只把声音变成输入框里的文字，不自动发送
+  voiceStart: 'chat.voiceStart', voiceListening: 'chat.voiceListening',
+  voiceRecognizing: 'chat.voiceRecognizing', voiceStopHint: 'chat.voiceStopHint',
+  voiceKeyboard: 'chat.voiceKeyboard', voiceAuth: 'chat.voiceAuth',
+  voiceOpen: 'chat.voiceOpen', voiceEmpty: 'chat.voiceEmpty',
+  voiceFail: 'chat.voiceFail', voiceDone: 'chat.voiceDone',
 };
 
 const SCENE_META = [
@@ -62,6 +69,11 @@ Page({
     isGenerating: false,
     inputText: '',
     inputLen: 0,
+    inputFocus: false,
+    voiceState: 'idle',
+    voiceTip: '',
+    voiceSeconds: 0,
+    voiceMode: 'keyboard',
     error: '',
     errorText: '',
     retryUser: '',
@@ -76,7 +88,17 @@ Page({
     this._timedOut = false;
     this._timer = null;
     this._streamError = null;
-    this.setData({ t: this.buildTexts() });
+    this._voiceBase = '';
+    this._voiceTimer = null;
+    this._longPress = false;
+    this._lastLongPressAt = 0;
+    const voiceMode = speech.configure({
+      onStateChange: (st, mode) => this.onVoiceState(st, mode),
+      onPartial: (text) => this.onVoicePartial(text),
+      onResult: (text) => this.onVoiceResult(text),
+      onError: (reason) => this.onVoiceError(reason),
+    });
+    this.setData({ t: this.buildTexts(), voiceMode });
     this.buildScenes();
     this.loadModels();
   },
@@ -84,6 +106,8 @@ Page({
   onUnload() {
     theme.unbind(this);
     this.clearTimer();
+    this.stopVoiceTimer();
+    speech.cancel();
     this._stopped = true;
     try { if (this._controller) this._controller.abort(); } catch (e) {}
   },
@@ -178,6 +202,117 @@ Page({
     this.setData({ inputText: v, inputLen: v.length });
   },
 
+  onInputBlur() { this.setData({ inputFocus: false }); },
+
+  // ---------- 语音输入：轻点开始 / 再点结束；按住说话 / 松手结束 ----------
+  onVoiceTap() {
+    // 长按松手后微信可能补发一次 tap，400ms 内忽略，避免刚结束又重新开始
+    if (Date.now() - (this._lastLongPressAt || 0) < 400) return;
+    if (this.data.isGenerating) return;
+    if (speech.isRecording()) return this.stopVoice();
+    return this.startVoice();
+  },
+
+  onVoiceLongPress() {
+    if (this.data.isGenerating || speech.isRecording()) return null;
+    this._longPress = true;
+    return this.startVoice();
+  },
+
+  onVoiceTouchEnd() {
+    if (!this._longPress) return;
+    this._longPress = false;
+    this._lastLongPressAt = Date.now();
+    if (speech.isRecording()) this.stopVoice();
+  },
+
+  onVoiceCancel() {
+    this._longPress = false;
+    speech.cancel();
+    this.onVoiceState('idle', null);
+  },
+
+  async startVoice() {
+    if (this.data.voiceState !== 'idle' || this.data.isGenerating) return;
+    this._voiceBase = this.data.inputText || '';
+    const r = await speech.start({ lang: i18n.getLang(), baseText: this._voiceBase });
+    if (r.ok) return;
+    // 个人主体默认降级：调起单行输入框，用系统键盘 / 微信键盘的麦克风说话
+    if (r.mode === 'keyboard' || r.reason === 'start-failed' || r.reason === 'recognize-failed') {
+      this.setData({ inputFocus: true });
+      wx.showToast({ title: i18n.t('chat.voiceKeyboard'), icon: 'none' });
+      return;
+    }
+    if (r.reason === 'auth-denied') return this.showVoiceAuth(r.needSetting);
+    wx.showToast({ title: i18n.t('chat.voiceFail'), icon: 'none' });
+  },
+
+  stopVoice() { return speech.stop(); },
+
+  showVoiceAuth(needSetting) {
+    const content = i18n.t('chat.voiceAuth');
+    if (!needSetting || typeof wx.showModal !== 'function') {
+      wx.showToast({ title: content, icon: 'none' });
+      return;
+    }
+    wx.showModal({
+      title: i18n.t('chat.voiceStart'),
+      content,
+      confirmText: i18n.t('chat.voiceOpen'),
+      success: (r) => { if (r.confirm && typeof wx.openSetting === 'function') wx.openSetting({}); },
+    });
+  },
+
+  onVoiceState(st, mode) {
+    const t = this.data.t || {};
+    const tip = st === 'recording' ? t.voiceListening
+      : (st === 'recognizing' ? t.voiceRecognizing : '');
+    this.setData({ voiceState: st, voiceTip: tip, voiceMode: mode || this.data.voiceMode });
+    if (st === 'recording') {
+      this.setData({ voiceSeconds: 0 });
+      this.startVoiceTimer();
+    } else {
+      this.stopVoiceTimer();
+    }
+  },
+
+  startVoiceTimer() {
+    this.stopVoiceTimer();
+    this._voiceTimer = setInterval(() => {
+      if (this.data.voiceState !== 'recording') return this.stopVoiceTimer();
+      this.setData({ voiceSeconds: this.data.voiceSeconds + 1 });
+    }, 1000);
+  },
+
+  stopVoiceTimer() {
+    if (this._voiceTimer) { clearInterval(this._voiceTimer); this._voiceTimer = null; }
+  },
+
+  // 实时识别（插件模式）：追加到录音前已有的文字后，用户可随时编辑
+  onVoicePartial(text) {
+    const v = speech.mergeText(this._voiceBase, text).slice(0, 500);
+    this.setData({ inputText: v, inputLen: v.length });
+  },
+
+  // 最终结果：只填入输入框，绝不自动发送 —— 发送前仍走 checkInput 审核
+  onVoiceResult(text) {
+    const v = speech.mergeText(this._voiceBase, text).slice(0, 500);
+    this.setData({ inputText: v, inputLen: v.length });
+    wx.showToast({ title: this.data.t.voiceDone, icon: 'none' });
+  },
+
+  onVoiceError(reason) {
+    const map = {
+      empty: 'chat.voiceEmpty',
+      'auth-denied': 'chat.voiceAuth',
+      'record-failed': 'chat.voiceFail',
+      'recognize-failed': 'chat.voiceFail',
+      'stop-failed': 'chat.voiceFail',
+      'plugin-error': 'chat.voiceFail',
+    };
+    wx.showToast({ title: i18n.t(map[reason] || 'chat.voiceFail'), icon: 'none' });
+  },
+
   onPickScene(e) {
     if (this.data.isGenerating) {
       wx.showToast({ title: i18n.t('chat.sceneLocked'), icon: 'none' });
@@ -202,6 +337,11 @@ Page({
   },
 
   onSend() {
+    // 录音中点发送：结束录音，把已转出的文字当作普通输入发送
+    if (this.data.voiceState !== 'idle') {
+      speech.cancel();
+      this.onVoiceState('idle', null);
+    }
     const text = (this.data.inputText || '').trim();
     if (text) this.send(text);
   },
@@ -241,7 +381,7 @@ Page({
     this._timedOut = false;
     this._streamError = null;
     this.setData({
-      messages, empty: false, inputText: '', inputLen: 0,
+      messages, empty: false, inputText: '', inputLen: 0, inputFocus: false,
       isGenerating: true, error: '', errorText: '',
       scrollToId: 'msg-' + (messages.length - 1),
       retryUser: text,
@@ -363,7 +503,12 @@ Page({
       content: i18n.t('chat.clearConfirm'),
       success: (r) => {
         if (!r.confirm) return;
-        this.setData({ messages: [], empty: true, error: '', errorText: '', scrollToId: '' });
+        speech.cancel();
+        this.stopVoiceTimer();
+        this.setData({
+          messages: [], empty: true, error: '', errorText: '', scrollToId: '',
+          voiceState: 'idle', voiceTip: '',
+        });
         this.saveHistory();
       },
     });

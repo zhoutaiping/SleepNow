@@ -189,4 +189,15 @@ module.exports = {
   'chat.sceneLocked': 'Wait for this reply before switching',
   'chat.safetyDev': 'Dev mode: cloud content safety not enabled',
   'chat.clear': 'Clear',
+  // ===== Voice input (personal accounts fall back to the keyboard mic) =====
+  'chat.voiceStart': 'Voice input',
+  'chat.voiceListening': 'Listening',
+  'chat.voiceRecognizing': 'Turning speech into text',
+  'chat.voiceStopHint': 'Tap to stop, or release to finish',
+  'chat.voiceKeyboard': 'Tap the mic on your keyboard to speak',
+  'chat.voiceAuth': 'Microphone access is needed for voice input',
+  'chat.voiceOpen': 'Open settings',
+  'chat.voiceEmpty': "Didn't catch that, please try again",
+  'chat.voiceFail': 'Voice input unavailable, please type instead',
+  'chat.voiceDone': 'Turned into text, review before sending',
 };
